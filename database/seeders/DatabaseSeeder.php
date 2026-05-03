@@ -19,8 +19,7 @@ class DatabaseSeeder extends Seeder
             'role'     => 'admin',
         ]);
 
-        Prodi::create(['nama_prodi' => 'Teknik Informatika', 'fakultas' => 'Teknik']);
-        Prodi::create(['nama_prodi' => 'Sistem Informasi',   'fakultas' => 'Teknik']);
+        Prodi::create(['nama_prodi' => 'Teknologi Informasi', 'fakultas' => 'Teknik']);
         Prodi::create(['nama_prodi' => 'Manajemen',          'fakultas' => 'Ekonomi']);
     }
 }

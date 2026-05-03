@@ -1,58 +1,156 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SiPesan : Sistem Pengajuan Surat Mahasiswa
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk pengajuan surat mahasiswa secara digital.
+Dibangun sebagai Tugas Akhir mata kuliah Pemrograman Web II.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tim Pengembang
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Nama    | Role                   | GitHub      |
+| ------- | ---------------------- | ----------- |
+| Maulana | Project Lead & Backend | @LeSisyphus |
+| Adiya   | Frontend & UI          | @Adiyaus    |
+| Azri    | Backend & CRUD Admin   | @AzriPrime  |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Komponen        | Teknologi      |
+| --------------- | -------------- |
+| Backend         | Laravel 11     |
+| Database        | MySQL          |
+| CSS             | Tailwind CSS   |
+| JS              | Alpine.js      |
+| Template        | Blade          |
+| Auth            | Laravel Breeze |
+| Version Control | Git + GitHub   |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Cara Instalasi
 
-## Agentic Development
+### Prasyarat
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Pastikan sudah terinstall di komputer:
 
-```bash
-composer require laravel/boost --dev
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- MySQL
 
-php artisan boost:install
+### Langkah Instalasi
+
+1. Clone repository
+
+    ```bash
+    git clone https://github.com/username/SiPesan.git
+    cd SiPesan
+    ```
+
+2. Install dependencies PHP
+
+    ```bash
+    composer install
+    ```
+
+3. Install dependencies JavaScript
+
+    ```bash
+    npm install
+    ```
+
+4. Salin file environment
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+5. Konfigurasi database di file `.env`
+
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=sipesan
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
+
+6. Jalankan migration dan seeder
+
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
+
+7. Build assets
+
+    ```bash
+    npm run build
+    ```
+
+8. Jalankan server
+
+    ```bash
+    php artisan serve
+    ```
+
+9. Buka browser di `http://localhost:8000`
+
+---
+
+## Akun Default
+
+| Role      | Email                       | Password |
+| --------- | --------------------------- | -------- |
+| Admin     | admin@sipesan.com           | password |
+| Mahasiswa | daftar via halaman register | -        |
+
+---
+
+## Struktur Database
+
+| Tabel                | Keterangan                                 |
+| -------------------- | ------------------------------------------ |
+| `users`              | Akun login semua role                      |
+| `mahasiswa`          | Data profil mahasiswa                      |
+| `prodi`              | Data program studi                         |
+| `jenis_surat`        | Jenis surat yang tersedia                  |
+| `dokumen_syarat`     | Syarat per jenis surat                     |
+| `jenis_surat_syarat` | Relasi many-to-many jenis surat dan syarat |
+| `pengajuan`          | Data pengajuan surat mahasiswa             |
+
+---
+
+## Alur Status Pengajuan
+
+```
+Menunggu → Diproses → Selesai
+                    → Ditolak
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## Role Pengguna
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Admin / TU
 
-## Code of Conduct
+- Melihat semua pengajuan
+- Memproses, menyetujui, atau menolak pengajuan
+- Mengelola data jenis surat, prodi, dan mahasiswa
+- Mengunduh laporan pengajuan
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Mahasiswa
 
-## Security Vulnerabilities
+- Mengajukan surat
+- Memantau status pengajuan
+- Mengunduh surat yang sudah selesai
+- Mengelola profil
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Lisensi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proyek ini dibuat untuk keperluan akademik Tugas Akhir mata kuliah Pemrograman Web II
