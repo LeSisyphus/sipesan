@@ -200,8 +200,8 @@ File-file berikut rawan konflik jika diedit bersamaan oleh lebih dari satu orang
 
 ## Aturan Tambahan
 
-- Jangan push langsung ke `main` — selalu lewat Pull Request
-- Jangan merge PR milik sendiri — minta anggota lain untuk review
+- Jangan push langsung ke `main` : selalu lewat Pull Request
+- Jangan merge PR milik sendiri : minta anggota lain untuk review
 - Selesaikan semua konflik sebelum minta review
 - Hapus branch setelah PR berhasil di-merge
 - Jangan commit file `.env`, `node_modules/`, atau `vendor/`
