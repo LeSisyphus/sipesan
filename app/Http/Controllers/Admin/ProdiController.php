@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Prodi;
-use Illuminate\Http\Request; // <-- TAMBAHAN WAJIB
+use Illuminate\Http\Request; 
 
 class ProdiController extends Controller
 {
@@ -25,7 +25,7 @@ class ProdiController extends Controller
             'fakultas' => 'required|string|max:255',
         ]);
 
-        Prodi::create($validated); // <-- PENGUBAHAN: Gunakan data yang tervalidasi
+        Prodi::create($validated); 
 
         return redirect()->route('admin.prodi.index')->with('success', 'Prodi berhasil ditambahkan.');
     }
@@ -42,14 +42,14 @@ class ProdiController extends Controller
             'fakultas' => 'required|string|max:255',
         ]);
 
-        $prodi->update($validated); // <-- PENGUBAHAN: Gunakan data yang tervalidasi
+        $prodi->update($validated); 
 
         return redirect()->route('admin.prodi.index')->with('success', 'Prodi berhasil diperbarui.');
     }
 
     public function destroy(Prodi $prodi)
     {
-        // <-- PENGUBAHAN: Cek apakah prodi memiliki mahasiswa sebelum dihapus
+        // Cek apakah prodi masih ada mahasiswa sebelum dihapus
         if ($prodi->mahasiswa()->count() > 0) {
             return redirect()->route('admin.prodi.index')->with('error', 'Gagal dihapus! Prodi ini masih memiliki data mahasiswa.');
         }
