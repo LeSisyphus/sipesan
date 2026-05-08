@@ -17,3 +17,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware(['auth', 'mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
     Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])->name('dashboard');
 });
+
+Route::resource('prodi', ProdiController::class);
