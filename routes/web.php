@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
+use App\Http\Controllers\Admin\ProdiController;
 
 Route::get('/', function () {
     return redirect()->route('login');
