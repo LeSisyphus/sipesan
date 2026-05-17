@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
+use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
 
 Route::get('/', function () {
@@ -13,6 +14,7 @@ require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+    Route::resource('/jenis-surat', JenisSuratController::class);
     Route::resource('/dokumen-syarat', DokumenSyaratController::class);
 });
 
