@@ -1,3 +1,73 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   SIPESAN — Shared Stylesheet
+   ============================================================ */
+
+/* --- Body background ---------------------------------------- */
+body {
+  background-color: #f8f9ff;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(0, 112, 235, 0.07), transparent 30%),
+    radial-gradient(circle at 85% 30%, rgba(102, 100, 228, 0.07), transparent 30%);
+  background-attachment: fixed;
+}
+
+/* --- Page entry transition ----------------------------------- */
+body { animation: sp-fadein 0.25s ease both; }
+@keyframes sp-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* --- Glassmorphism card ------------------------------------- */
+.glass-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 88, 188, 0.06);
+}
+
+/* --- Glass form input --------------------------------------- */
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(193, 198, 215, 0.55);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.glass-input:focus {
+  border-color: #0058bc;
+  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.15);
+}
+
+/* --- Material Symbols default ------------------------------- */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* --- Sidebar slide (mobile) --------------------------------- */
+#sidebar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (max-width: 767px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+}
+
+/* --- Sidebar overlay (mobile) ------------------------------- */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 28, 42, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 40;
+}
+#sidebar-overlay.open { display: block; }
