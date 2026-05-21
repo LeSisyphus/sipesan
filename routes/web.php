@@ -8,6 +8,7 @@ use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
 use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\PengajuanController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -35,7 +36,7 @@ Route::middleware(['auth', 'admin'])
         |--------------------------------------------------------------------------
         */
 
-        Route::view('/pengajuan', 'admin.pengajuan.index')
+        Route::get('/pengajuan', [PengajuanController::class, 'index'])
             ->name('pengajuan.index');
 
         Route::view('/mahasiswa', 'admin.dashboard')
