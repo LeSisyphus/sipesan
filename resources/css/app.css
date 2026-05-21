@@ -6,68 +6,512 @@
    SIPESAN — Shared Stylesheet
    ============================================================ */
 
-/* --- Body background ---------------------------------------- */
+/* ── Fonts ──────────────────────────────────────────────────── */
+@layer base {
+    body {
+        font-family: "Poppins", sans-serif;
+    }
+}
+
+/* ── Material Symbols default ───────────────────────────────── */
+.material-symbols-outlined {
+    font-variation-settings:
+        "FILL" 0,
+        "wght" 400,
+        "GRAD" 0,
+        "opsz" 24;
+}
+
+/* ── Page entry transition ──────────────────────────────────── */
 body {
-  background-color: #f8f9ff;
-  background-image:
-    radial-gradient(circle at 15% 50%, rgba(0, 112, 235, 0.07), transparent 30%),
-    radial-gradient(circle at 85% 30%, rgba(102, 100, 228, 0.07), transparent 30%);
-  background-attachment: fixed;
+    animation: sp-fadein 0.25s ease both;
 }
-
-/* --- Page entry transition ----------------------------------- */
-body { animation: sp-fadein 0.25s ease both; }
 @keyframes sp-fadein {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0);   }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* --- Glassmorphism card ------------------------------------- */
+/* ── Glassmorphism card ─────────────────────────────────────── */
 .glass-panel {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.60);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 32px 0 rgba(0, 88, 188, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 8px 32px 0 rgba(0, 88, 188, 0.06);
 }
 
-/* --- Glass form input --------------------------------------- */
+/* ── Glass form input (login) ───────────────────────────────── */
 .glass-input {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(193, 198, 215, 0.55);
-  border-radius: 0.75rem;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(193, 198, 215, 0.55);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    outline: none;
 }
 .glass-input:focus {
-  border-color: #0058bc;
-  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.15);
+    border-color: #0058bc;
+    box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.15);
 }
 
-/* --- Material Symbols default ------------------------------- */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-/* --- Sidebar slide (mobile) --------------------------------- */
+/* ── Sidebar (app layout) ───────────────────────────────────── */
 #sidebar {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 @media (max-width: 767px) {
-  #sidebar { transform: translateX(-100%); }
-  #sidebar.open { transform: translateX(0); }
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    #sidebar.open {
+        transform: translateX(0);
+    }
+}
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 28, 42, 0.35);
+    backdrop-filter: blur(2px);
+    z-index: 40;
+}
+#sidebar-overlay.open {
+    display: block;
 }
 
-/* --- Sidebar overlay (mobile) ------------------------------- */
-#sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(18, 28, 42, 0.35);
-  backdrop-filter: blur(2px);
-  z-index: 40;
+/* ============================================================
+   AUTH LAYOUT  (guest.blade.php)
+   ============================================================ */
+
+/* ── Background halaman auth ────────────────────────────────── */
+.auth-bg {
+    background-color: #eef2ff;
+    background-image:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(0, 88, 188, 0.1),
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 90% 80%,
+            rgba(102, 100, 228, 0.1),
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 60% 10%,
+            rgba(0, 112, 235, 0.06),
+            transparent 30%
+        );
+    background-attachment: fixed;
 }
-#sidebar-overlay.open { display: block; }
+
+/* ── Card entrance ──────────────────────────────────────────── */
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+.auth-card {
+    animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Blue panel: floating blobs ─────────────────────────────── */
+.panel-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.25;
+    animation: blobFloat 8s ease-in-out infinite alternate;
+}
+@keyframes blobFloat {
+    from {
+        transform: translateY(0) scale(1);
+    }
+    to {
+        transform: translateY(20px) scale(1.08);
+    }
+}
+
+/* ── Wave SVG di bawah panel kiri ──────────────────────────── */
+.panel-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+}
+
+/* ── Slide-dots indicator ───────────────────────────────────── */
+.auth-dot {
+    transition:
+        width 0.35s ease,
+        opacity 0.35s ease;
+}
+.auth-dot.active {
+    width: 28px;
+    opacity: 1;
+}
+.auth-dot.inactive {
+    width: 8px;
+    opacity: 0.45;
+}
+
+/* ── Input focus ring (login) ───────────────────────────────── */
+.sipesan-input:focus {
+    outline: none;
+    border-color: #0058bc;
+    box-shadow: 0 0 0 3.5px rgba(0, 88, 188, 0.18);
+}
+
+/* ============================================================
+   REGISTER FORM
+   ============================================================ */
+
+/* ── Step transition ────────────────────────────────────────── */
+[x-cloak] {
+    display: none !important;
+}
+
+@keyframes stepIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.step-enter {
+    animation: stepIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Register sidebar: step indicators ─────────────────────── */
+.reg-step-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    transition: opacity 0.25s;
+}
+.reg-step-item.inactive {
+    opacity: 0.45;
+}
+
+.reg-step-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition:
+        background 0.25s,
+        border-color 0.25s;
+}
+.reg-step-icon.active {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: white;
+}
+.reg-step-icon.active .material-symbols-outlined {
+    color: #0d4bcf;
+}
+.reg-step-icon .material-symbols-outlined {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 20px;
+}
+
+/* ── Register sidebar: wave decoration ─────────────────────── */
+.reg-sidebar-wave {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.12;
+}
+
+/* ── Progress dots (register sidebar) ──────────────────────── */
+.reg-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 2rem;
+}
+.reg-dot {
+    height: 4px;
+    border-radius: 2px;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    background: rgba(255, 255, 255, 0.35);
+}
+.reg-dot.active {
+    background: white;
+}
+
+/* ── Step badge ─────────────────────────────────────────────── */
+.reg-step-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #e8f0fe;
+    color: #0d4bcf;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Progress track ─────────────────────────────────────────── */
+.reg-progress-track {
+    height: 3px;
+    background: #e8ecf5;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+.reg-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0d4bcf, #3b82f6);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Register form inputs ───────────────────────────────────── */
+.reg-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.45rem;
+}
+.reg-label .req {
+    color: #e53e3e;
+}
+
+.reg-input {
+    width: 100%;
+    padding: 0.72rem 1rem;
+    border: 1.5px solid #e2e8f2;
+    border-radius: 12px;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.875rem;
+    color: #1e293b;
+    background: #f8faff;
+    outline: none;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s,
+        background 0.2s;
+}
+.reg-input::placeholder {
+    color: #a8b4cc;
+}
+.reg-input:focus {
+    border-color: #0d4bcf;
+    background: #ffffff;
+    box-shadow: 0 0 0 3.5px rgba(13, 75, 207, 0.12);
+}
+.reg-input.is-error {
+    border-color: #f87171;
+    background: #fff5f5;
+}
+
+/* ── Register select ────────────────────────────────────────── */
+.reg-select {
+    width: 100%;
+    padding: 0.72rem 2.5rem 0.72rem 2.75rem;
+    border: 1.5px solid #e2e8f2;
+    border-radius: 12px;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.875rem;
+    color: #1e293b;
+    background: #f8faff;
+    appearance: none;
+    outline: none;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    cursor: pointer;
+}
+.reg-select:focus {
+    border-color: #0d4bcf;
+    background: white;
+    box-shadow: 0 0 0 3.5px rgba(13, 75, 207, 0.12);
+}
+.reg-select.is-error {
+    border-color: #f87171;
+    background: #fff5f5;
+}
+
+.reg-select-wrap {
+    position: relative;
+}
+.reg-select-icon-l {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+.reg-select-icon-r {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+.reg-select-icon-l .material-symbols-outlined,
+.reg-select-icon-r .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ── Register input with icon (password toggle) ─────────────── */
+.reg-input-wrap {
+    position: relative;
+}
+.reg-input-icon {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    border-radius: 6px;
+}
+.reg-input-icon:hover {
+    color: #475569;
+}
+.reg-input-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+.reg-input.has-icon {
+    padding-right: 3rem;
+}
+
+/* ── Error message ──────────────────────────────────────────── */
+.reg-error {
+    font-size: 0.75rem;
+    color: #e53e3e;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.reg-error .material-symbols-outlined {
+    font-size: 14px;
+}
+
+/* ── Register buttons ───────────────────────────────────────── */
+.reg-btn-primary {
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #0d4bcf, #1a6fd4);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition:
+        transform 0.15s,
+        box-shadow 0.15s,
+        opacity 0.15s;
+    box-shadow: 0 4px 14px rgba(13, 75, 207, 0.35);
+}
+.reg-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(13, 75, 207, 0.4);
+}
+.reg-btn-primary:active {
+    transform: translateY(0);
+}
+.reg-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reg-btn-back {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f2;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #475569;
+    transition:
+        background 0.2s,
+        border-color 0.2s;
+    flex-shrink: 0;
+}
+.reg-btn-back:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.reg-btn-row {
+    display: flex;
+    gap: 0.875rem;
+    align-items: center;
+}
+.reg-btn-row .reg-btn-primary {
+    flex: 1;
+}
+
+/* ── Checkbox T&C ───────────────────────────────────────────── */
+.reg-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    font-size: 0.8rem;
+    color: #475569;
+    cursor: pointer;
+    line-height: 1.5;
+}
+.reg-checkbox-label input[type="checkbox"] {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    accent-color: #0d4bcf;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.reg-checkbox-label a {
+    color: #0d4bcf;
+    font-weight: 600;
+    text-decoration: none;
+}
+.reg-checkbox-label a:hover {
+    text-decoration: underline;
+}
