@@ -21,7 +21,7 @@ class PengajuanController extends Controller
                 $query->where('status', $status);
             })
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         return view('admin.pengajuan.index', compact('pengajuan', 'status'));
