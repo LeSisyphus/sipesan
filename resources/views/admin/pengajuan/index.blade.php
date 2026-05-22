@@ -38,6 +38,24 @@
         }
     }"
 >
+
+     {{-- HEADER --}}
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
+        <div>
+
+            <h1 class="text-[32px] font-bold tracking-tight text-slate-900">
+                Pengajuan Masuk
+            </h1>
+
+            <p class="text-slate-500 mt-1">
+                Kelola pengajuan surat.
+            </p>
+
+        </div>
+
+    </div>
+
     {{-- FILTER --}}
     @php
         $filters = [
