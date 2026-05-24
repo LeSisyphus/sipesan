@@ -210,7 +210,7 @@ Sistem Informasi,420,350,40,30`
         </div>
 
         {{-- KPI CARDS --}}
-        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 xl:grid-cols-3 gap-4">
 
             {{-- TOTAL --}}
             <div class="glass-panel rounded-[24px] p-5 space-y-4
@@ -339,50 +339,6 @@ Sistem Informasi,420,350,40,30`
                 <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
 
                     <div class="h-full w-[28%] rounded-full bg-red-500"></div>
-
-                </div>
-
-            </div>
-
-            {{-- AVG --}}
-            <div class="glass-panel rounded-[24px] p-5 space-y-4
-            hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
-
-                <div class="flex items-center justify-between">
-
-                    <div class="w-12 h-12 rounded-2xl bg-violet-100
-                        flex items-center justify-center text-violet-600">
-
-                        <span class="material-symbols-outlined">
-                            timer
-                        </span>
-
-                    </div>
-
-                    <span class="px-2 py-1 rounded-full
-                        bg-violet-100 text-violet-600
-                        text-xs font-bold">
-
-                        3 Jam
-                    </span>
-
-                </div>
-
-                <div>
-
-                    <p class="text-xs text-slate-500 font-medium">
-                        Rata-rata Proses
-                    </p>
-
-                    <h3 class="text-3xl font-bold text-slate-800">
-                        2.8 Jam
-                    </h3>
-
-                </div>
-
-                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-
-                    <div class="h-full w-[60%] rounded-full bg-violet-600"></div>
 
                 </div>
 
