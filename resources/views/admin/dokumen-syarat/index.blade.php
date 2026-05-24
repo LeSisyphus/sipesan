@@ -208,18 +208,6 @@
 
                     <div class="flex items-center gap-3 ml-4">
 
-                        <button class="text-[#2563eb]">
-                            <span class="material-symbols-outlined">
-                                edit
-                            </span>
-                        </button>
-
-                        <button class="text-[#ef4444]">
-                            <span class="material-symbols-outlined">
-                                delete
-                            </span>
-                        </button>
-
                         <button 
                             class="text-[#64748b]"
                             @click="openCard === 1 ? openCard = null : openCard = 1"
