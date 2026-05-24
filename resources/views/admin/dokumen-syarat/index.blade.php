@@ -5,7 +5,7 @@
 @section('content')
 
 <div x-data="{ openTambahModal: false, openCard: 1, openRequirementModal: false }">
-<main class="ml-0 md:ml-64 min-h-screen flex flex-col">
+<main class="ml-0 md:ml-64 min-h-screen flex flex-col pt-6">
     <div class="flex-1 px-6 pb-10 pt-6 w-full space-y-7">
     <div class="w-full px-8 py-8 space-y-7">
 
@@ -21,20 +21,6 @@
                     Kelola persyaratan dokumen untuk setiap jenis surat pengajuan.
                 </p>
             </div>
-
-            <button
-                @click="openTambahModal = true"
-                class="h-14 px-7 rounded-full bg-[#0058BC] hover:bg-[#0066d9]
-                text-white font-semibold text-[15px]
-                shadow-[0_10px_25px_rgba(0,88,188,0.25)]
-                transition-all duration-300 flex items-center gap-2"
-            >
-                <span class="material-symbols-outlined text-[20px]">
-                    add
-                </span>
-
-                Tambah Jenis Surat
-            </button>
         </div>
 
         {{-- STATS --}}
