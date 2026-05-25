@@ -40,6 +40,16 @@ Route::middleware(['auth', 'admin'])
         Route::get('/pengajuan', [PengajuanController::class, 'index'])
             ->name('pengajuan.index');
 
+        Route::patch('/pengajuan/{pengajuan}', [PengajuanController::class, 'update'])
+            ->name('pengajuan.update');
+
+        Route::get('/pengajuan/dokumen/{dokumen}/lihat', [PengajuanController::class, 'lihatDokumen'])
+            ->name('pengajuan.dokumen.lihat');
+
+        Route::get('/pengajuan/dokumen/{dokumen}/download', [PengajuanController::class, 'downloadDokumen'])
+            ->name('pengajuan.dokumen.download');
+
+
         Route::view('/mahasiswa', 'admin.dashboard')
             ->name('mahasiswa.index');
         

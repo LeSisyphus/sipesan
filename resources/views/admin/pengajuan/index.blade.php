@@ -8,38 +8,108 @@
     x-data="{
         openModal: false,
         selectedPengajuan: null,
+        selectedStatus: 'menunggu',
+        catatanAdmin: '',
 
         openDetail(data) {
             this.selectedPengajuan = data;
+            this.selectedStatus = data.status_raw ?? 'menunggu';
+            this.catatanAdmin = data.catatan_admin ?? '';
             this.openModal = true;
         },
 
         closeModal() {
             this.openModal = false;
             this.selectedPengajuan = null;
+            this.selectedStatus = 'menunggu';
+            this.catatanAdmin = '';
         },
 
         savePengajuan() {
-            Swal.fire({
-                title: 'Perubahan Disimpan',
-                text: 'Status pengajuan berhasil diperbarui.',
-                icon: 'success',
-                confirmButtonColor: '#0058bc',
-                confirmButtonText: 'Oke',
-                background: '#ffffffee',
-                backdrop: 'rgba(15,23,42,0.35)',
-                customClass: {
-                    popup: 'rounded-[28px]',
-                    confirmButton: 'rounded-full px-6 py-2'
-                }
-            });
+            if (this.selectedStatus === 'ditolak' && !this.catatanAdmin.trim()) {
+                Swal.fire({
+                    title: 'Catatan Wajib Diisi',
+                    text: 'Catatan atau alasan wajib diisi jika pengajuan ditolak.',
+                    icon: 'warning',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
 
-            this.closeModal();
+                return;
+            }
+
+            this.$refs.formPengajuan.submit();
         }
     }"
 >
 
-     {{-- HEADER --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    title: 'Berhasil',
+                    text: {{ Illuminate\Support\Js::from(session('success')) }},
+                    icon: 'success',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    title: 'Gagal',
+                    text: {{ Illuminate\Support\Js::from(session('error')) }},
+                    icon: 'error',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    title: 'Validasi Gagal',
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    icon: 'error',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    {{-- HEADER --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
         <div>
@@ -187,32 +257,45 @@
                             </td>
 
                             <td class="p-6 text-center">
-    @php
-        $detailPengajuan = [
-            'id' => '#REQ-' . str_pad($item->id, 4, '0', STR_PAD_LEFT),
-            'nama' => $item->mahasiswa->user->name ?? '-',
-            'nim' => $item->mahasiswa->user->nim ?? '-',
-            'jenis_surat' => $item->jenisSurat->nama_surat ?? '-',
-            'tanggal' => $item->tgl_ajuan
-                ? \Carbon\Carbon::parse($item->tgl_ajuan)->translatedFormat('d F Y')
-                : '-',
-            'keperluan' => $item->keperluan ?? '-',
-            'status' => ucfirst($item->status),
-            'catatan_admin' => $item->catatan_admin ?? '',
-            'file_surat' => $item->file_surat ?? null,
-        ];
-    @endphp
+                                @php
+                                    $dokumenPertama = $item->dokumen->first();
 
-    <button
-        type="button"
-        @click="openDetail({{ Illuminate\Support\Js::from($detailPengajuan) }})"
-        class="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors"
-    >
-        <span class="material-symbols-outlined">
-            visibility
-        </span>
-    </button>
-</td>
+                                    $detailPengajuan = [
+                                        'id' => '#REQ-' . str_pad($item->id, 4, '0', STR_PAD_LEFT),
+                                        'nama' => $item->mahasiswa->user->name ?? '-',
+                                        'nim' => $item->mahasiswa->user->nim ?? '-',
+                                        'jenis_surat' => $item->jenisSurat->nama_surat ?? '-',
+                                        'tanggal' => $item->tgl_ajuan
+                                            ? \Carbon\Carbon::parse($item->tgl_ajuan)->translatedFormat('d F Y')
+                                            : '-',
+                                        'keperluan' => $item->keperluan ?? '-',
+                                        'status' => ucfirst($item->status),
+                                        'status_raw' => $item->status,
+                                        'catatan_admin' => $item->catatan_admin ?? '',
+                                        'file_surat' => $item->file_surat ?? null,
+                                        'update_url' => route('admin.pengajuan.update', $item->id),
+                                        'dokumen_pemohon' => $dokumenPertama ? [
+                                            'nama' => $dokumenPertama->dokumenSyarat->nama_dokumen ?? 'Dokumen Pemohon',
+                                            'original_name' => $dokumenPertama->original_name ?? 'Dokumen Pemohon',
+                                            'file_size' => $dokumenPertama->file_size
+                                                ? number_format($dokumenPertama->file_size / 1024, 1) . ' KB'
+                                                : '-',
+                                            'lihat_url' => route('admin.pengajuan.dokumen.lihat', $dokumenPertama->id),
+                                            'download_url' => route('admin.pengajuan.dokumen.download', $dokumenPertama->id),
+                                        ] : null,
+                                    ];
+                                @endphp
+
+                                <button
+                                    type="button"
+                                    @click="openDetail({{ Illuminate\Support\Js::from($detailPengajuan) }})"
+                                    class="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors"
+                                >
+                                    <span class="material-symbols-outlined">
+                                        visibility
+                                    </span>
+                                </button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -246,7 +329,15 @@
         ></div>
 
         {{-- MODAL CONTENT --}}
-        <div class="relative z-[1000] w-full max-w-2xl max-h-[92vh] overflow-hidden rounded-[24px] bg-white/90 backdrop-blur-2xl border border-white/50 shadow-[0_24px_80px_rgba(0,112,235,0.18)] flex flex-col">
+        <form
+            x-ref="formPengajuan"
+            method="POST"
+            :action="selectedPengajuan?.update_url ?? '#'"
+            enctype="multipart/form-data"
+            class="relative z-[1000] w-full max-w-2xl max-h-[92vh] overflow-hidden rounded-[24px] bg-white/90 backdrop-blur-2xl border border-white/50 shadow-[0_24px_80px_rgba(0,112,235,0.18)] flex flex-col"
+        >
+            @csrf
+            @method('PATCH')
 
             {{-- HEADER --}}
             <div class="px-8 py-5 border-b border-white/40 bg-white/30 flex items-center justify-between shrink-0">
@@ -345,22 +436,20 @@
                                     </div>
 
                                     <div>
-                                        <p class="text-[14px] font-medium text-slate-800">
-                                            Dokumen Pemohon
+                                        <p class="text-[14px] font-medium text-slate-800" x-text="selectedPengajuan?.dokumen_pemohon?.nama ?? 'Dokumen Pemohon'">
                                         </p>
 
-                                        <p class="text-xs text-slate-400">
-                                            Belum tersedia pada issue ini
+                                        <p class="text-xs text-slate-400" x-text="selectedPengajuan?.dokumen_pemohon?.original_name ?? 'Belum tersedia'">
                                         </p>
                                     </div>
                                 </div>
 
-                                <button
-                                    type="button"
+                                <a
+                                    :href="selectedPengajuan?.dokumen_pemohon?.download_url ?? '#'"
                                     class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100 transition-colors"
                                 >
                                     Download
-                                </button>
+                                </a>
                             </div>
 
                             <div class="aspect-video bg-slate-100 flex items-center justify-center">
@@ -372,6 +461,15 @@
                                     <p class="text-sm text-slate-400 mt-2">
                                         Preview Dokumen
                                     </p>
+
+                                    <a
+                                        x-show="selectedPengajuan?.dokumen_pemohon?.lihat_url"
+                                        :href="selectedPengajuan?.dokumen_pemohon?.lihat_url ?? '#'"
+                                        target="_blank"
+                                        class="inline-flex mt-3 px-4 py-2 rounded-xl bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors border border-slate-200"
+                                    >
+                                        Lihat Dokumen
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -390,7 +488,11 @@
                                 Update Status
                             </label>
 
-                            <select class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/70 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <select
+                                name="status"
+                                x-model="selectedStatus"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/70 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
                                 <option value="menunggu">Menunggu</option>
                                 <option value="diproses">Diproses</option>
                                 <option value="selesai">Selesai</option>
@@ -404,10 +506,11 @@
                             </label>
 
                             <textarea
+                                name="catatan_admin"
                                 rows="3"
                                 placeholder="Tambahkan catatan untuk pemohon..."
                                 class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/70 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                x-text="selectedPengajuan?.catatan_admin ?? ''"
+                                x-model="catatanAdmin"
                             ></textarea>
                         </div>
 
@@ -439,8 +542,9 @@
 
                                 <input
                                     type="file"
+                                    name="file_surat"
                                     class="hidden"
-                                    accept=".pdf"
+                                    accept=".pdf,application/pdf"
                                 >
                             </label>
                         </div>
@@ -502,7 +606,7 @@
                     Simpan Perubahan
                 </button>
             </div>
-        </div>
+        </form>
     </div>
 </main>
 @endsection
