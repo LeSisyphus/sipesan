@@ -10,11 +10,20 @@
         selectedPengajuan: null,
         selectedStatus: 'menunggu',
         catatanAdmin: '',
+        fileSuratName: null,
+        fileSuratUrl: null,
 
         openDetail(data) {
             this.selectedPengajuan = data;
             this.selectedStatus = data.status_raw ?? 'menunggu';
             this.catatanAdmin = data.catatan_admin ?? '';
+            this.fileSuratName = null;
+
+            if (this.fileSuratUrl) {
+                URL.revokeObjectURL(this.fileSuratUrl);
+            }
+
+            this.fileSuratUrl = null;
             this.openModal = true;
         },
 
@@ -23,6 +32,80 @@
             this.selectedPengajuan = null;
             this.selectedStatus = 'menunggu';
             this.catatanAdmin = '';
+            this.fileSuratName = null;
+
+            if (this.fileSuratUrl) {
+                URL.revokeObjectURL(this.fileSuratUrl);
+            }
+
+            this.fileSuratUrl = null;
+        },
+
+        handleFileSurat(event) {
+            const file = event.target.files[0];
+
+            if (!file) {
+                this.fileSuratName = null;
+
+                if (this.fileSuratUrl) {
+                    URL.revokeObjectURL(this.fileSuratUrl);
+                }
+
+                this.fileSuratUrl = null;
+                return;
+            }
+
+            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+            if (!isPdf) {
+                event.target.value = '';
+                this.fileSuratName = null;
+
+                if (this.fileSuratUrl) {
+                    URL.revokeObjectURL(this.fileSuratUrl);
+                }
+
+                this.fileSuratUrl = null;
+
+                Swal.fire({
+                    title: 'Format Tidak Valid',
+                    text: 'Dokumen balasan harus berupa file PDF.',
+                    icon: 'warning',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+
+                return;
+            }
+
+            this.fileSuratName = file.name;
+
+            if (this.fileSuratUrl) {
+                URL.revokeObjectURL(this.fileSuratUrl);
+            }
+
+            this.fileSuratUrl = URL.createObjectURL(file);
+            this.selectedStatus = 'selesai';
+        },
+
+        clearFileSurat() {
+            if (this.$refs.fileSurat) {
+                this.$refs.fileSurat.value = '';
+            }
+
+            this.fileSuratName = null;
+
+            if (this.fileSuratUrl) {
+                URL.revokeObjectURL(this.fileSuratUrl);
+            }
+
+            this.fileSuratUrl = null;
         },
 
         savePengajuan() {
@@ -44,7 +127,76 @@
                 return;
             }
 
+            const fileInput = this.$refs.fileSurat;
+            const hasNewFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            const hasExistingFile = !!this.selectedPengajuan?.file_surat;
+
+            if (hasNewFile && this.selectedStatus !== 'selesai') {
+                Swal.fire({
+                    title: 'Status Belum Selesai',
+                    text: 'Jika mengunggah dokumen balasan, status pengajuan harus diubah menjadi selesai.',
+                    icon: 'warning',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+
+                return;
+            }
+
+            if (this.selectedStatus === 'selesai' && !hasNewFile && !hasExistingFile) {
+                Swal.fire({
+                    title: 'Dokumen Balasan Wajib',
+                    text: 'Upload dokumen balasan terlebih dahulu sebelum menyelesaikan pengajuan.',
+                    icon: 'warning',
+                    confirmButtonColor: '#0058bc',
+                    confirmButtonText: 'Oke',
+                    background: '#ffffffee',
+                    backdrop: 'rgba(15,23,42,0.35)',
+                    customClass: {
+                        popup: 'rounded-[28px]',
+                        confirmButton: 'rounded-full px-6 py-2'
+                    }
+                });
+
+                return;
+            }
+
             this.$refs.formPengajuan.submit();
+        },
+
+        deleteSurat() {
+            if (!this.selectedPengajuan?.surat_delete_url) {
+                return;
+            }
+
+            Swal.fire({
+                title: 'Hapus Surat Balasan?',
+                text: 'File surat balasan akan dihapus. Jika status pengajuan sudah selesai, status akan dikembalikan menjadi diproses.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                background: '#ffffffee',
+                backdrop: 'rgba(15,23,42,0.35)',
+                customClass: {
+                    popup: 'rounded-[28px]',
+                    confirmButton: 'rounded-full px-6 py-2',
+                    cancelButton: 'rounded-full px-6 py-2'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.$refs.formHapusSurat.setAttribute('action', this.selectedPengajuan.surat_delete_url);
+                    this.$refs.formHapusSurat.submit();
+                }
+            });
         }
     }"
 >
@@ -54,7 +206,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     title: 'Berhasil',
-                    text: {{ Illuminate\Support\Js::from(session('success')) }},
+                    text: @json(session('success')),
                     icon: 'success',
                     confirmButtonColor: '#0058bc',
                     confirmButtonText: 'Oke',
@@ -74,7 +226,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     title: 'Gagal',
-                    text: {{ Illuminate\Support\Js::from(session('error')) }},
+                    text: @json(session('errorr')),
                     icon: 'error',
                     confirmButtonColor: '#0058bc',
                     confirmButtonText: 'Oke',
@@ -109,7 +261,8 @@
         </script>
     @endif
 
-    {{-- HEADER --}}
+
+     {{-- HEADER --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
         <div>
@@ -257,7 +410,7 @@
                             </td>
 
                             <td class="p-6 text-center">
-                                @php
+    @php
                                     $dokumenPertama = $item->dokumen->first();
 
                                     $detailPengajuan = [
@@ -272,7 +425,16 @@
                                         'status' => ucfirst($item->status),
                                         'status_raw' => $item->status,
                                         'catatan_admin' => $item->catatan_admin ?? '',
-                                        'file_surat' => $item->file_surat ?? null,
+                                        'file_surat' => $item->file_surat ? basename($item->file_surat) : null,
+                                        'surat_lihat_url' => $item->file_surat
+                                            ? route('admin.pengajuan.surat.lihat', $item->id)
+                                            : null,
+                                        'surat_download_url' => $item->file_surat
+                                            ? route('admin.pengajuan.surat.download', $item->id)
+                                            : null,
+                                        'surat_delete_url' => $item->file_surat
+                                            ? route('admin.pengajuan.surat.hapus', $item->id)
+                                            : null,
                                         'update_url' => route('admin.pengajuan.update', $item->id),
                                         'dokumen_pemohon' => $dokumenPertama ? [
                                             'nama' => $dokumenPertama->dokumenSyarat->nama_dokumen ?? 'Dokumen Pemohon',
@@ -286,16 +448,16 @@
                                     ];
                                 @endphp
 
-                                <button
-                                    type="button"
-                                    @click="openDetail({{ Illuminate\Support\Js::from($detailPengajuan) }})"
-                                    class="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors"
-                                >
-                                    <span class="material-symbols-outlined">
-                                        visibility
-                                    </span>
-                                </button>
-                            </td>
+    <button
+        type="button"
+        @click="openDetail({{ Illuminate\Support\Js::from($detailPengajuan) }})"
+        class="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors"
+    >
+        <span class="material-symbols-outlined">
+            visibility
+        </span>
+    </button>
+</td>
                         </tr>
                     @empty
                         <tr>
@@ -543,6 +705,8 @@
                                 <input
                                     type="file"
                                     name="file_surat"
+                                    x-ref="fileSurat"
+                                    @change="handleFileSurat($event)"
                                     class="hidden"
                                     accept=".pdf,application/pdf"
                                 >
@@ -550,34 +714,85 @@
                         </div>
 
                         <div
-                            x-show="selectedPengajuan?.file_surat"
+                            x-show="selectedPengajuan?.file_surat || fileSuratName"
                             class="rounded-2xl bg-white/50 border border-white/60 p-4"
                         >
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
                                         <span class="material-symbols-outlined">
                                             description
                                         </span>
                                     </div>
 
-                                    <div>
+                                    <div class="min-w-0">
                                         <p class="text-[14px] font-medium text-slate-800">
                                             Surat Balasan
                                         </p>
 
-                                        <p class="text-xs text-slate-400" x-text="selectedPengajuan?.file_surat"></p>
+                                        <p
+                                            class="text-xs text-slate-400 truncate"
+                                            x-text="fileSuratName ?? selectedPengajuan?.file_surat"
+                                        ></p>
+
+                                        <p
+                                            x-show="fileSuratName"
+                                            class="text-[11px] text-blue-500 mt-1"
+                                        >
+                                            File baru dipilih, belum disimpan.
+                                        </p>
                                     </div>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                                >
-                                    <span class="material-symbols-outlined">
-                                        delete
-                                    </span>
-                                </button>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <a
+                                        x-show="fileSuratUrl || selectedPengajuan?.surat_lihat_url"
+                                        :href="fileSuratUrl ?? selectedPengajuan?.surat_lihat_url ?? '#'"
+                                        target="_blank"
+                                        class="p-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                                        title="Lihat surat"
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            visibility
+                                        </span>
+                                    </a>
+
+                                    <a
+                                        x-show="fileSuratUrl || selectedPengajuan?.surat_download_url"
+                                        :href="fileSuratUrl ?? selectedPengajuan?.surat_download_url ?? '#'"
+                                        :download="fileSuratName ?? null"
+                                        class="p-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                                        title="Download surat"
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            download
+                                        </span>
+                                    </a>
+
+                                    <button
+                                        type="button"
+                                        x-show="fileSuratName"
+                                        @click="clearFileSurat()"
+                                        class="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                                        title="Batalkan file baru"
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            close
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        x-show="selectedPengajuan?.surat_delete_url && !fileSuratName"
+                                        @click="deleteSurat()"
+                                        class="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                                        title="Hapus surat"
+                                    >
+                                        <span class="material-symbols-outlined">
+                                            delete
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -606,6 +821,15 @@
                     Simpan Perubahan
                 </button>
             </div>
+        </form>
+
+        <form
+            x-ref="formHapusSurat"
+            method="POST"
+            class="hidden"
+        >
+            @csrf
+            @method('DELETE')
         </form>
     </div>
 </main>

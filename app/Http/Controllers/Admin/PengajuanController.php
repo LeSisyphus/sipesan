@@ -54,6 +54,18 @@ class PengajuanController extends Controller
                 ->withInput();
         }
 
+        if ($request->hasFile('file_surat') && $validated['status'] !== 'selesai') {
+            return back()
+                ->withErrors(['file_surat' => 'Jika mengunggah dokumen balasan, status pengajuan harus diubah menjadi selesai.'])
+                ->withInput();
+        }
+
+        if ($validated['status'] === 'selesai' && ! $request->hasFile('file_surat') && ! $pengajuan->file_surat) {
+            return back()
+                ->withErrors(['file_surat' => 'Dokumen balasan wajib diunggah jika status pengajuan selesai.'])
+                ->withInput();
+        }
+
         $data = [
             'status' => $validated['status'],
             'catatan_admin' => $validated['catatan_admin'] ?? null,
@@ -95,6 +107,51 @@ class PengajuanController extends Controller
         return Storage::disk('public')->download(
             $dokumen->file_path,
             $dokumen->original_name
+        );
+    }
+
+    public function hapusSurat(Pengajuan $pengajuan): RedirectResponse{
+        if (! $pengajuan->file_surat) {
+            return back()->with('error', 'Surat balasan belum tersedia.');
+        }
+
+        if (Storage::disk('public')->exists($pengajuan->file_surat)) {
+            Storage::disk('public')->delete($pengajuan->file_surat);
+        }
+
+        $data = [
+            'file_surat' => null,
+        ];
+
+        if ($pengajuan->status === 'selesai') {
+            $data['status'] = 'diproses';
+        }
+
+        $pengajuan->update($data);
+
+        return redirect()
+            ->route('admin.pengajuan.index')
+            ->with('success', 'Surat balasan berhasil dihapus.');
+}
+    public function lihatSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->response(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad($pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
+        );
+    }
+
+    public function downloadSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->download(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad($pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
         );
     }
 }

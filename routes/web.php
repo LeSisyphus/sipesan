@@ -49,6 +49,14 @@ Route::middleware(['auth', 'admin'])
         Route::get('/pengajuan/dokumen/{dokumen}/download', [PengajuanController::class, 'downloadDokumen'])
             ->name('pengajuan.dokumen.download');
 
+        Route::get('/pengajuan/{pengajuan}/surat/lihat', [PengajuanController::class, 'lihatSurat'])
+            ->name('pengajuan.surat.lihat');
+
+        Route::get('/pengajuan/{pengajuan}/surat/download', [PengajuanController::class, 'downloadSurat'])
+            ->name('pengajuan.surat.download');
+        
+        Route::delete('/pengajuan/{pengajuan}/surat', [PengajuanController::class, 'hapusSurat'])
+            ->name('pengajuan.surat.hapus');
 
         Route::view('/mahasiswa', 'admin.dashboard')
             ->name('mahasiswa.index');
