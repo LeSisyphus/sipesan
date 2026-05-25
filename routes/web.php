@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\PengajuanController;
+use App\Http\Controllers\Mahasiswa\PengajuanController as MahasiswaPengajuanController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -56,4 +57,12 @@ Route::middleware(['auth', 'mahasiswa'])
 
         Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])
             ->name('dashboard');
+        Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])
+            ->name('pengajuan.create');
+
+        Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])
+            ->name('pengajuan.store');
+
+        Route::get('/pengajuan/{pengajuan}/success', [MahasiswaPengajuanController::class, 'success'])
+            ->name('pengajuan.success');
     });
