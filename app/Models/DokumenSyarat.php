@@ -13,7 +13,6 @@ class DokumenSyarat extends Model
         'keterangan',
     ];
 
-    // Relasi Many-to-Many balik ke JenisSurat
     public function jenisSurat()
     {
         return $this->belongsToMany(
@@ -22,5 +21,10 @@ class DokumenSyarat extends Model
             'dokumen_syarat_id',
             'jenis_surat_id'
         );
+    }
+
+    public function pengajuanDokumen()
+    {
+        return $this->hasMany(PengajuanDokumen::class);
     }
 }
