@@ -16,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
     ];
 
     protected $hidden = [
@@ -29,6 +30,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    /**
+     * Get the user's initials.
+     */
+    public function getInisialAttribute()
+    {
+        $name = $this->name ?? '';
+        return collect(explode(' ', $name))
+            ->filter()
+            ->map(fn($w) => substr($w, 0, 1))
+            ->take(2)
+            ->implode('');
     }
 
     // Relasi ke Mahasiswa

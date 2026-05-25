@@ -42,8 +42,12 @@ Route::middleware(['auth', 'admin'])
         Route::view('/mahasiswa', 'admin.dashboard')
             ->name('mahasiswa.index');
         
-        Route::view('/akun-mahasiswa', 'admin.akun-mahasiswa.index')
+        Route::get('/akun-mahasiswa', [\App\Http\Controllers\Admin\MahasiswaController::class, 'index'])
             ->name('akun-mahasiswa.index');
+        Route::patch('/akun-mahasiswa/{id}/reset-password', [\App\Http\Controllers\Admin\MahasiswaController::class, 'resetPassword'])
+            ->name('akun-mahasiswa.reset-password');
+        Route::patch('/akun-mahasiswa/{id}/toggle-status', [\App\Http\Controllers\Admin\MahasiswaController::class, 'toggleStatus'])
+            ->name('akun-mahasiswa.toggle-status');
         
         Route::view('/laporan', 'admin.laporan.index')
             ->name('laporan.index');
