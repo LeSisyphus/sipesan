@@ -4,13 +4,109 @@
 
 @section('content')
 
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            confirmButtonColor: '#2563EB',
+            confirmButtonText: 'Oke'
+        });
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: "{{ session('error') }}",
+            confirmButtonColor: '#DC2626',
+            confirmButtonText: 'Oke'
+        });
+    });
+</script>
+@endif
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validasi Gagal!',
+            html: '{!! implode("<br>", $errors->all()) !!}',
+            confirmButtonColor: '#DC2626',
+            confirmButtonText: 'Oke'
+        });
+    });
+</script>
+@endif
+
 <main
     class="ml-0 md:ml-64 min-h-screen flex flex-col pt-20"
     x-data="{
         openModal: false,
         deleteModal: false,
+        activeFilter: 'Semua',
+        search: '',
+        
+        isEdit: false,
+        actionUrl: '',
+        formData: {
+            kode_prodi: '',
+            nama_prodi: '',
+            jenjang: 'S1',
+            akreditasi: 'A',
+            fakultas: '',
+            ketua_prodi: '',
+            tahun_berdiri: '',
+            deskripsi: '',
+            status: 'aktif'
+        },
 
-        activeFilter: 'Semua'
+        editProdi(prodi) {
+            this.isEdit = true;
+            this.actionUrl = '{{ url('/admin/prodi') }}/' + prodi.id;
+            this.formData = {
+                kode_prodi: prodi.kode_prodi,
+                nama_prodi: prodi.nama_prodi,
+                jenjang: prodi.jenjang,
+                akreditasi: prodi.akreditasi,
+                fakultas: prodi.fakultas,
+                ketua_prodi: prodi.ketua_prodi || '',
+                tahun_berdiri: prodi.tahun_berdiri || '',
+                deskripsi: prodi.deskripsi || '',
+                status: prodi.status
+            };
+            this.openModal = true;
+        },
+
+        addProdi() {
+            this.isEdit = false;
+            this.actionUrl = '{{ route('admin.prodi.store') }}';
+            this.formData = {
+                kode_prodi: '',
+                nama_prodi: '',
+                jenjang: 'S1',
+                akreditasi: 'A',
+                fakultas: '',
+                ketua_prodi: '',
+                tahun_berdiri: '',
+                deskripsi: '',
+                status: 'aktif'
+            };
+            this.openModal = true;
+        },
+
+        deleteUrl: '',
+        confirmDelete(id) {
+            this.deleteUrl = '{{ url('/admin/prodi') }}/' + id;
+            this.deleteModal = true;
+        }
     }"
 >
 
@@ -30,7 +126,7 @@
             </div>
 
             <button
-                @click="openModal = true"
+                @click="addProdi()"
                 class="flex items-center gap-2 bg-primary text-white hover:bg-blue-700
                 px-6 py-3 rounded-full shadow-lg transition-all duration-300
                 text-sm font-semibold"
@@ -64,7 +160,7 @@
                     </p>
 
                     <h3 class="text-2xl font-bold text-slate-800">
-                        6
+                        {{ $totalProdi }}
                     </h3>
                 </div>
             </div>
@@ -86,7 +182,7 @@
                     </p>
 
                     <h3 class="text-2xl font-bold text-slate-800">
-                        5
+                        {{ $totalAktif }}
                     </h3>
                 </div>
             </div>
@@ -108,7 +204,7 @@
                     </p>
 
                     <h3 class="text-2xl font-bold text-slate-800">
-                        2.450
+                        {{ number_format($totalMahasiswa, 0, ',', '.') }}
                     </h3>
                 </div>
             </div>
@@ -130,7 +226,7 @@
                     </p>
 
                     <h3 class="text-2xl font-bold text-slate-800">
-                        3
+                        {{ $totalAkreditasiA }}
                     </h3>
                 </div>
             </div>
@@ -150,6 +246,7 @@
                 <input
                     type="text"
                     placeholder="Cari prodi atau kode..."
+                    x-model="search"
                     class="w-full h-[50px] pl-12 pr-4 rounded-2xl border border-[#E2E8F0]
                     bg-white/80 focus:border-blue-500 focus:ring-0 text-sm"
                 >
@@ -262,23 +359,29 @@
                     {{-- BODY --}}
                     <tbody class="divide-y divide-[#EDF2F7]">
 
-                        {{-- ROW --}}
-                        <tr class="hover:bg-[#F8FAFC] transition">
+                        @forelse($prodis as $prodi)
+                        <tr 
+                            class="hover:bg-[#F8FAFC] transition"
+                            x-show="(activeFilter === 'Semua' || activeFilter === '{{ $prodi->jenjang }}') && 
+                            ('{{ strtolower($prodi->nama_prodi) }}'.includes(search.toLowerCase()) || 
+                             '{{ strtolower($prodi->kode_prodi) }}'.includes(search.toLowerCase()) ||
+                             '{{ strtolower($prodi->fakultas) }}'.includes(search.toLowerCase()))"
+                        >
 
                             <td class="px-5 py-5">
                                 <span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold">
-                                    TIF
+                                    {{ $prodi->kode_prodi }}
                                 </span>
                             </td>
 
                             <td class="px-5 py-5">
 
                                 <h3 class="font-semibold text-slate-800">
-                                    Teknik Informatika
+                                    {{ $prodi->nama_prodi }}
                                 </h3>
 
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Pengembangan perangkat lunak dan sistem komputer.
+                                    {{ $prodi->deskripsi ?: 'Tidak ada deskripsi singkat.' }}
                                 </p>
 
                             </td>
@@ -286,7 +389,7 @@
                             <td class="px-5 py-5">
 
                                 <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-bold">
-                                    S1
+                                    {{ $prodi->jenjang }}
                                 </span>
 
                             </td>
@@ -300,13 +403,13 @@
                                         workspace_premium
                                     </span>
 
-                                    A
+                                    {{ $prodi->akreditasi }}
                                 </span>
 
                             </td>
 
                             <td class="px-5 py-5 text-sm text-slate-600">
-                                Dr. Budi Santoso, M.Kom
+                                {{ $prodi->ketua_prodi ?: '-' }}
                             </td>
 
                             <td class="px-5 py-5">
@@ -317,19 +420,19 @@
                                         groups
                                     </span>
 
-                                    620
+                                    {{ $prodi->mahasiswa_count }}
                                 </div>
 
                             </td>
 
                             <td class="px-5 py-5">
 
-                                <span class="inline-flex items-center gap-2 px-3 py-1
-                                    rounded-full bg-green-50 text-green-600 text-xs font-semibold">
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold
+                                    {{ $prodi->status === 'aktif' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }}">
 
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                    <span class="w-2 h-2 rounded-full {{ $prodi->status === 'aktif' ? 'bg-green-500' : 'bg-red-500' }}"></span>
 
-                                    Aktif
+                                    {{ $prodi->status === 'aktif' ? 'Aktif' : 'Non Aktif' }}
                                 </span>
 
                             </td>
@@ -339,7 +442,7 @@
                                 <div class="flex items-center justify-center gap-1">
 
                                     <button
-                                        @click="openModal = true"
+                                        @click="editProdi({{ json_encode($prodi) }})"
                                         class="w-9 h-9 rounded-xl flex items-center justify-center
                                         text-blue-600 hover:bg-blue-50 transition"
                                     >
@@ -349,7 +452,7 @@
                                     </button>
 
                                     <button
-                                        @click="deleteModal = true"
+                                        @click="confirmDelete({{ $prodi->id }})"
                                         class="w-9 h-9 rounded-xl flex items-center justify-center
                                         text-red-500 hover:bg-red-50 transition"
                                     >
@@ -363,6 +466,18 @@
                             </td>
 
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="px-5 py-10 text-center text-slate-400">
+                                <div class="flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-[48px]">
+                                        inbox
+                                    </span>
+                                    <p class="text-sm font-medium">Tidak ada data program studi ditemukan.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
 
                     </tbody>
 
@@ -383,11 +498,17 @@
         style="display: none;"
     >
 
-        <div
+        <form
+            :action="actionUrl"
+            method="POST"
             @click.outside="openModal = false"
             class="w-full max-w-2xl rounded-[32px] bg-white
             shadow-2xl overflow-hidden"
         >
+            @csrf
+            <template x-if="isEdit">
+                <input type="hidden" name="_method" value="PUT">
+            </template>
 
             {{-- HEADER --}}
             <div class="px-8 py-6 border-b border-[#E2E8F0]
@@ -395,7 +516,7 @@
 
                 <div>
 
-                    <h2 class="text-[30px] font-bold text-slate-800">
+                    <h2 class="text-[30px] font-bold text-slate-800" x-text="isEdit ? 'Edit Program Studi' : 'Tambah Program Studi'">
                         Tambah Program Studi
                     </h2>
 
@@ -406,6 +527,7 @@
                 </div>
 
                 <button
+                    type="button"
                     @click="openModal = false"
                     class="w-10 h-10 rounded-full hover:bg-slate-100
                     flex items-center justify-center transition"
@@ -429,7 +551,10 @@
 
                         <input
                             type="text"
+                            name="kode_prodi"
+                            x-model="formData.kode_prodi"
                             placeholder="TIF"
+                            required
                             class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                             px-5 focus:border-blue-500 focus:ring-0"
                         >
@@ -441,13 +566,16 @@
                         </label>
 
                         <select
+                            name="jenjang"
+                            x-model="formData.jenjang"
+                            required
                             class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                             px-5 focus:border-blue-500 focus:ring-0"
                         >
-                            <option>S1</option>
-                            <option>D3</option>
-                            <option>D4</option>
-                            <option>S2</option>
+                            <option value="S1">S1</option>
+                            <option value="D3">D3</option>
+                            <option value="D4">D4</option>
+                            <option value="S2">S2</option>
                         </select>
                     </div>
 
@@ -460,14 +588,29 @@
 
                     <input
                         type="text"
+                        name="nama_prodi"
+                        x-model="formData.nama_prodi"
                         placeholder="Teknik Informatika"
+                        required
                         class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                         px-5 focus:border-blue-500 focus:ring-0"
                     >
                 </div>
 
                 <div>
+                    <label class="block mb-2 text-sm font-semibold text-slate-700">
+                        Fakultas
+                    </label>
 
+                    <input
+                        type="text"
+                        name="fakultas"
+                        x-model="formData.fakultas"
+                        placeholder="Fakultas Teknik"
+                        required
+                        class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
+                        px-5 focus:border-blue-500 focus:ring-0"
+                    >
                 </div>
 
                 <div class="grid grid-cols-2 gap-5">
@@ -479,6 +622,8 @@
 
                         <input
                             type="text"
+                            name="ketua_prodi"
+                            x-model="formData.ketua_prodi"
                             placeholder="Nama Ketua Prodi"
                             class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                             px-5 focus:border-blue-500 focus:ring-0"
@@ -491,18 +636,21 @@
                         </label>
 
                         <select
+                            name="akreditasi"
+                            x-model="formData.akreditasi"
+                            required
                             class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                             px-5 focus:border-blue-500 focus:ring-0"
                         >
-                            <option>A</option>
-                            <option>B</option>
-                            <option>C</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
                         </select>
                     </div>
 
                 </div>
 
-                {{-- TAHUN BERDIRI + JUMLAH MAHASISWA --}}
+                {{-- TAHUN BERDIRI --}}
                 <div class="grid grid-cols-2 gap-5">
 
                     <div>
@@ -512,6 +660,8 @@
 
                         <input
                             type="number"
+                            name="tahun_berdiri"
+                            x-model="formData.tahun_berdiri"
                             placeholder="2002"
                             class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
                             px-5 focus:border-blue-500 focus:ring-0"
@@ -520,15 +670,48 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-semibold text-slate-700">
-                            Jumlah Mahasiswa
+                            Status
                         </label>
 
-                        <input
-                            type="number"
-                            placeholder="620"
-                            class="w-full h-[54px] rounded-2xl border border-[#E2E8F0]
-                            px-5 focus:border-blue-500 focus:ring-0"
-                        >
+                        <div class="flex items-center gap-6 mt-3">
+
+                            {{-- AKTIF --}}
+                            <label class="flex items-center gap-3 cursor-pointer">
+
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="aktif"
+                                    x-model="formData.status"
+                                    class="w-4 h-4 text-blue-600 border-[#CBD5E1]
+                                    focus:ring-blue-500"
+                                >
+
+                                <span class="text-sm font-medium text-slate-700">
+                                    Aktif
+                                </span>
+
+                            </label>
+
+                            {{-- NON AKTIF --}}
+                            <label class="flex items-center gap-3 cursor-pointer">
+
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="nonaktif"
+                                    x-model="formData.status"
+                                    class="w-4 h-4 text-blue-600 border-[#CBD5E1]
+                                    focus:ring-blue-500"
+                                >
+
+                                <span class="text-sm font-medium text-slate-700">
+                                    Non Aktif
+                                </span>
+
+                            </label>
+
+                        </div>
                     </div>
 
                 </div>
@@ -541,57 +724,13 @@
                     </label>
 
                     <textarea
+                        name="deskripsi"
+                        x-model="formData.deskripsi"
                         rows="4"
                         placeholder="Deskripsi singkat program studi..."
                         class="w-full rounded-2xl border border-[#E2E8F0]
                         px-5 py-4 resize-none focus:border-blue-500 focus:ring-0"
                     ></textarea>
-
-                </div>
-
-                {{-- STATUS --}}
-                <div>
-
-                    <label class="block mb-3 text-sm font-semibold text-slate-700">
-                        Status
-                    </label>
-
-                    <div class="flex items-center gap-6">
-
-                        {{-- AKTIF --}}
-                        <label class="flex items-center gap-3 cursor-pointer">
-
-                            <input
-                                type="radio"
-                                name="status"
-                                checked
-                                class="w-4 h-4 text-blue-600 border-[#CBD5E1]
-                                focus:ring-blue-500"
-                            >
-
-                            <span class="text-sm font-medium text-slate-700">
-                                Aktif
-                            </span>
-
-                        </label>
-
-                        {{-- NON AKTIF --}}
-                        <label class="flex items-center gap-3 cursor-pointer">
-
-                            <input
-                                type="radio"
-                                name="status"
-                                class="w-4 h-4 text-blue-600 border-[#CBD5E1]
-                                focus:ring-blue-500"
-                            >
-
-                            <span class="text-sm font-medium text-slate-700">
-                                Non Aktif
-                            </span>
-
-                        </label>
-
-                    </div>
 
                 </div>
 
@@ -602,6 +741,7 @@
                 flex justify-end gap-3">
 
                 <button
+                    type="button"
                     @click="openModal = false"
                     class="px-6 py-3 rounded-full bg-slate-100
                     text-slate-700 font-semibold hover:bg-slate-200 transition"
@@ -610,17 +750,7 @@
                 </button>
 
                 <button
-                    @click="
-                        openModal = false;
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Data program studi berhasil disimpan.',
-                            confirmButtonColor: '#2563EB',
-                            confirmButtonText: 'Oke'
-                        })
-                    "
+                    type="submit"
                     class="px-7 py-3 rounded-full bg-blue-600 text-white
                     font-semibold shadow-lg hover:bg-blue-700 transition"
                 >
@@ -629,7 +759,7 @@
 
             </div>
 
-        </div>
+        </form>
 
     </div>
 
@@ -670,6 +800,7 @@
             <div class="mt-8 flex gap-3">
 
                 <button
+                    type="button"
                     @click="deleteModal = false"
                     class="flex-1 h-[52px] rounded-full bg-slate-100
                     font-semibold text-slate-700"
@@ -678,16 +809,10 @@
                 </button>
 
                 <button
+                    type="button"
                     @click="
+                        document.getElementById('delete-form').submit();
                         deleteModal = false;
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Data program studi berhasil dihapus.',
-                            confirmButtonColor: '#DC2626',
-                            confirmButtonText: 'Oke'
-                        })
                     "
                     class="flex-1 h-[52px] rounded-full bg-red-500
                     text-white font-semibold"
@@ -700,6 +825,12 @@
         </div>
 
     </div>
+
+    {{-- HIDDEN DELETE FORM --}}
+    <form id="delete-form" :action="deleteUrl" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
 
 </main>
 
