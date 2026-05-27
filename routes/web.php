@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\PengajuanController;
+use App\Http\Controllers\Mahasiswa\PengajuanController as MahasiswaPengajuanController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -39,11 +40,33 @@ Route::middleware(['auth', 'admin'])
         Route::get('/pengajuan', [PengajuanController::class, 'index'])
             ->name('pengajuan.index');
 
+        Route::patch('/pengajuan/{pengajuan}', [PengajuanController::class, 'update'])
+            ->name('pengajuan.update');
+
+        Route::get('/pengajuan/dokumen/{dokumen}/lihat', [PengajuanController::class, 'lihatDokumen'])
+            ->name('pengajuan.dokumen.lihat');
+
+        Route::get('/pengajuan/dokumen/{dokumen}/download', [PengajuanController::class, 'downloadDokumen'])
+            ->name('pengajuan.dokumen.download');
+
+        Route::get('/pengajuan/{pengajuan}/surat/lihat', [PengajuanController::class, 'lihatSurat'])
+            ->name('pengajuan.surat.lihat');
+
+        Route::get('/pengajuan/{pengajuan}/surat/download', [PengajuanController::class, 'downloadSurat'])
+            ->name('pengajuan.surat.download');
+        
+        Route::delete('/pengajuan/{pengajuan}/surat', [PengajuanController::class, 'hapusSurat'])
+            ->name('pengajuan.surat.hapus');
+
         Route::view('/mahasiswa', 'admin.dashboard')
             ->name('mahasiswa.index');
         
-        Route::view('/akun-mahasiswa', 'admin.akun-mahasiswa.index')
+        Route::get('/akun-mahasiswa', [\App\Http\Controllers\Admin\MahasiswaController::class, 'index'])
             ->name('akun-mahasiswa.index');
+        Route::patch('/akun-mahasiswa/{id}/reset-password', [\App\Http\Controllers\Admin\MahasiswaController::class, 'resetPassword'])
+            ->name('akun-mahasiswa.reset-password');
+        Route::patch('/akun-mahasiswa/{id}/toggle-status', [\App\Http\Controllers\Admin\MahasiswaController::class, 'toggleStatus'])
+            ->name('akun-mahasiswa.toggle-status');
         
         Route::view('/laporan', 'admin.laporan.index')
             ->name('laporan.index');
@@ -65,4 +88,12 @@ Route::middleware(['auth', 'mahasiswa'])
 
         Route::view('/profile', 'mahasiswa.profile.index')
             ->name('profile');
+        Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])
+            ->name('pengajuan.create');
+
+        Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])
+            ->name('pengajuan.store');
+
+        Route::get('/pengajuan/{pengajuan}/success', [MahasiswaPengajuanController::class, 'success'])
+            ->name('pengajuan.success');
     });

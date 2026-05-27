@@ -9,8 +9,14 @@ class ProdiController extends Controller
 {
     public function index()
     {
-        $prodis = Prodi::all();
-        return view('admin.prodi.index', compact('prodis'));
+        $prodis = Prodi::withCount('mahasiswa')->get();
+        
+        $totalProdi = Prodi::count();
+        $totalAktif = Prodi::where('status', 'aktif')->count();
+        $totalMahasiswa = \App\Models\Mahasiswa::count();
+        $totalAkreditasiA = Prodi::where('akreditasi', 'A')->count();
+
+        return view('admin.prodi.index', compact('prodis', 'totalProdi', 'totalAktif', 'totalMahasiswa', 'totalAkreditasiA'));
     }
 
     public function create()
@@ -21,8 +27,15 @@ class ProdiController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_prodi' => 'required|string|max:255',
-            'fakultas' => 'required|string|max:255',
+            'kode_prodi'    => 'required|string|max:10|unique:prodi,kode_prodi',
+            'nama_prodi'    => 'required|string|max:255',
+            'jenjang'       => 'required|in:S1,D3,D4,S2',
+            'akreditasi'    => 'required|in:A,B,C',
+            'fakultas'      => 'required|string|max:255',
+            'ketua_prodi'   => 'nullable|string|max:255',
+            'tahun_berdiri' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'deskripsi'     => 'nullable|string',
+            'status'        => 'required|in:aktif,nonaktif',
         ]);
 
         Prodi::create($validated); 
@@ -38,8 +51,15 @@ class ProdiController extends Controller
     public function update(Request $request, Prodi $prodi)
     {
         $validated = $request->validate([
-            'nama_prodi' => 'required|string|max:255',
-            'fakultas' => 'required|string|max:255',
+            'kode_prodi'    => 'required|string|max:10|unique:prodi,kode_prodi,' . $prodi->id,
+            'nama_prodi'    => 'required|string|max:255',
+            'jenjang'       => 'required|in:S1,D3,D4,S2',
+            'akreditasi'    => 'required|in:A,B,C',
+            'fakultas'      => 'required|string|max:255',
+            'ketua_prodi'   => 'nullable|string|max:255',
+            'tahun_berdiri' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'deskripsi'     => 'nullable|string',
+            'status'        => 'required|in:aktif,nonaktif',
         ]);
 
         $prodi->update($validated); 

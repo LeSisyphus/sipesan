@@ -17,17 +17,27 @@ class Pengajuan extends Model
         'tgl_proses',
         'catatan_admin',
         'file_surat',
+        'data_tambahan',
     ];
 
-    // Relasi ke Mahasiswa
+    protected $casts = [
+        'data_tambahan' => 'array',
+        'tgl_ajuan' => 'date',
+        'tgl_proses' => 'date',
+    ];
+
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class);
     }
 
-    // Relasi ke JenisSurat
     public function jenisSurat()
     {
         return $this->belongsTo(JenisSurat::class);
+    }
+
+    public function dokumen()
+    {
+        return $this->hasMany(PengajuanDokumen::class);
     }
 }
