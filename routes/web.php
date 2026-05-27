@@ -56,4 +56,13 @@ Route::middleware(['auth', 'mahasiswa'])
 
         Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])
             ->name('dashboard');
+
+        Route::view('/pengajuan', 'mahasiswa.pengajuan.index')
+            ->name('pengajuan');
+
+        Route::view('/riwayat', 'mahasiswa.riwayat.index')
+            ->name('riwayat');
+
+        Route::view('/profile', 'mahasiswa.profile.index')
+            ->name('profile');
     });
