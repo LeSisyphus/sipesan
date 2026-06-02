@@ -31,12 +31,6 @@ Route::middleware(['auth', 'admin'])
 
         Route::resource('/prodi', ProdiController::class);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Temporary Dummy Routes
-        |--------------------------------------------------------------------------
-        */
-
         Route::get('/pengajuan', [PengajuanController::class, 'index'])
             ->name('pengajuan.index');
 
@@ -63,8 +57,10 @@ Route::middleware(['auth', 'admin'])
         
         Route::get('/akun-mahasiswa', [\App\Http\Controllers\Admin\MahasiswaController::class, 'index'])
             ->name('akun-mahasiswa.index');
+
         Route::patch('/akun-mahasiswa/{id}/reset-password', [\App\Http\Controllers\Admin\MahasiswaController::class, 'resetPassword'])
             ->name('akun-mahasiswa.reset-password');
+
         Route::patch('/akun-mahasiswa/{id}/toggle-status', [\App\Http\Controllers\Admin\MahasiswaController::class, 'toggleStatus'])
             ->name('akun-mahasiswa.toggle-status');
         
@@ -80,14 +76,10 @@ Route::middleware(['auth', 'mahasiswa'])
         Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])
             ->name('dashboard');
 
-        Route::view('/pengajuan', 'mahasiswa.pengajuan.index')
+        Route::get('/pengajuan', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan');
 
-        Route::view('/riwayat', 'mahasiswa.riwayat.index')
-            ->name('riwayat');
-
-        Route::view('/profile', 'mahasiswa.profile.index')
-            ->name('profile');
+        // Alias jika nanti ada link lama yang memakai /pengajuan/create.
         Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan.create');
 
@@ -96,4 +88,10 @@ Route::middleware(['auth', 'mahasiswa'])
 
         Route::get('/pengajuan/{pengajuan}/success', [MahasiswaPengajuanController::class, 'success'])
             ->name('pengajuan.success');
+
+        Route::view('/riwayat', 'mahasiswa.riwayat.index')
+            ->name('riwayat');
+
+        Route::view('/profile', 'mahasiswa.profile.index')
+            ->name('profile');
     });
