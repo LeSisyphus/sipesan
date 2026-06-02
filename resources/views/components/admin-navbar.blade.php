@@ -8,18 +8,11 @@
   </div>
   <div class="flex items-center gap-md">
     <!-- Search -->
-    <div class="hidden md:flex items-center bg-black/5 rounded-full px-4 py-2 border border-white/40 focus-within:border-primary/50 focus-within:bg-white/80 transition-all duration-300">
-      <span class="material-symbols-outlined text-outline mr-2">search</span>
-      <input class="bg-transparent border-none outline-none text-body-md text-on-surface placeholder:text-outline w-48 focus:w-64 transition-all duration-300" placeholder="Cari..." type="text"/>
-    </div>
+    
     <!-- Notif -->
     <button class="w-10 h-10 flex items-center justify-center rounded-full glass-panel text-blue-600 hover:bg-white/60 transition-colors">
       <span class="material-symbols-outlined">notifications</span>
     </button>
-    <!-- Avatar -->
-    <button class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/80 shadow-sm active:scale-95 transition-transform">
-      <img alt="Admin" class="w-full h-full object-cover"
-           src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGL2Kh1PSsm8u3lDd7-uVZs_447rmRW8tnsZEa2yXBtIyRuAU-RKc3Po6433mfg9XQiYyXTjG9m4_LzvCR-NcqZEdl8Ovtd3B5OnLCZGYzp0SeOgwji6ugNK0hAGCW3llJzcEI7LVbhHI7Z7kk9McaBpIh4tL0Bw4n24OsPPEG1CnVdkgP3Sfzsqoh2vvmdnCzZU0ARNX8g9NiHARmP-soazc1VoZS-s8ZVi712J9-7RR-hsYCnbjut4KULxnkkccBKU5hWGemrpC"/>
-    </button>
+    
   </div>
 </header>
