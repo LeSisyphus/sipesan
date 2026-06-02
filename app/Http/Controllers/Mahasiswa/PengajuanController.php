@@ -9,21 +9,18 @@ use App\Models\PengajuanDokumen;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PengajuanController extends Controller
 {
-    public function create(Request $request): View
+    public function create(): View
     {
-        $user = $request->user();
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa()->with('prodi')->first();
 
-        $mahasiswa = $user->mahasiswa()
-            ->with('prodi')
-            ->first();
-
-        $jenisSurat = JenisSurat::with(['dokumenSyarat' => function ($query) {
-                $query->orderBy('nama_dokumen');
-            }])
+        $jenisSurat = JenisSurat::with('dokumenSyarat')
             ->orderBy('nama_surat')
             ->get();
 
@@ -44,15 +41,11 @@ class PengajuanController extends Controller
             'keperluan' => ['required', 'string', 'min:5', 'max:2000'],
         ], [
             'alamat_lengkap.required' => 'Alamat lengkap wajib diisi.',
-            'alamat_lengkap.max' => 'Alamat lengkap maksimal 1000 karakter.',
             'tahun_ajaran.required' => 'Tahun ajaran wajib dipilih.',
             'semester.required' => 'Semester wajib dipilih.',
-            'semester.in' => 'Semester tidak valid.',
             'jenis_surat_id.required' => 'Jenis surat wajib dipilih.',
             'jenis_surat_id.exists' => 'Jenis surat tidak valid.',
             'keperluan.required' => 'Keperluan pengajuan wajib diisi.',
-            'keperluan.min' => 'Keperluan pengajuan minimal 5 karakter.',
-            'keperluan.max' => 'Keperluan pengajuan maksimal 2000 karakter.',
         ]);
 
         $mahasiswa = $request->user()->mahasiswa;
@@ -80,7 +73,6 @@ class PengajuanController extends Controller
             ];
 
             $fileMessages[$key . '.required'] = $dokumen->nama_dokumen . ' wajib diunggah.';
-            $fileMessages[$key . '.file'] = $dokumen->nama_dokumen . ' harus berupa file.';
             $fileMessages[$key . '.mimes'] = $dokumen->nama_dokumen . ' harus berformat PDF, JPG, JPEG, atau PNG.';
             $fileMessages[$key . '.max'] = $dokumen->nama_dokumen . ' maksimal berukuran 5 MB.';
         }
@@ -136,12 +128,43 @@ class PengajuanController extends Controller
 
     public function success(Pengajuan $pengajuan): View
     {
-        $mahasiswa = request()->user()->mahasiswa;
-
-        abort_if(! $mahasiswa || $pengajuan->mahasiswa_id !== $mahasiswa->id, 403);
+        $this->authorizeOwner($pengajuan);
 
         $pengajuan->load('jenisSurat');
 
         return view('mahasiswa.pengajuan.success', compact('pengajuan'));
+    }
+
+    public function lihatSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        $this->authorizeOwner($pengajuan);
+
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->response(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad((string) $pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
+        );
+    }
+
+    public function downloadSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        $this->authorizeOwner($pengajuan);
+
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->download(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad((string) $pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
+        );
+    }
+
+    private function authorizeOwner(Pengajuan $pengajuan): void
+    {
+        $mahasiswa = request()->user()->mahasiswa;
+
+        abort_if(! $mahasiswa || $pengajuan->mahasiswa_id !== $mahasiswa->id, 403);
     }
 }
