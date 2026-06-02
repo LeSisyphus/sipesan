@@ -4,30 +4,44 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pengajuan;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $mahasiswa = auth()->user()->mahasiswa;
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa()->with('prodi')->first();
 
-        $totalPengajuan = 0;
-        $menunggu       = 0;
-        $selesai        = 0;
-        $ditolak        = 0;
+        $baseQuery = Pengajuan::query();
 
         if ($mahasiswa) {
-            $totalPengajuan = Pengajuan::where('mahasiswa_id', $mahasiswa->id)->count();
-            $menunggu       = Pengajuan::where('mahasiswa_id', $mahasiswa->id)->where('status', 'menunggu')->count();
-            $selesai        = Pengajuan::where('mahasiswa_id', $mahasiswa->id)->where('status', 'selesai')->count();
-            $ditolak        = Pengajuan::where('mahasiswa_id', $mahasiswa->id)->where('status', 'ditolak')->count();
+            $baseQuery->where('mahasiswa_id', $mahasiswa->id);
+        } else {
+            $baseQuery->whereRaw('1 = 0');
         }
 
+        $totalPengajuan = (clone $baseQuery)->count();
+        $menunggu = (clone $baseQuery)->where('status', 'menunggu')->count();
+        $diproses = (clone $baseQuery)->where('status', 'diproses')->count();
+        $selesai = (clone $baseQuery)->where('status', 'selesai')->count();
+        $ditolak = (clone $baseQuery)->where('status', 'ditolak')->count();
+
+        $aktivitasTerbaru = (clone $baseQuery)
+            ->with('jenisSurat')
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
         return view('mahasiswa.dashboard', compact(
+            'user',
+            'mahasiswa',
             'totalPengajuan',
             'menunggu',
+            'diproses',
             'selesai',
-            'ditolak'
+            'ditolak',
+            'aktivitasTerbaru'
         ));
     }
 }
