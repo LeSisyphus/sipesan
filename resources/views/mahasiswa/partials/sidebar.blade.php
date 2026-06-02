@@ -113,23 +113,21 @@ shadow-xl shadow-blue-500/5">
     </nav>
 
     {{-- LOGOUT --}}
-    <div class="px-4 pb-5 border-t border-white/40 pt-4">
+<div class="px-4 pb-5 border-t border-white/40 pt-4">
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
 
         <button
-            class="w-full flex items-center gap-3 px-4 py-3
-            text-red-500 hover:bg-red-50
-            rounded-2xl text-sm font-semibold
-            tracking-wide transition-all"
+            type="submit"
+            class="w-full flex items-center gap-3 px-4 py-3 text-error/80 hover:bg-error/5 rounded-2xl font-sans text-sm font-semibold tracking-wide hover:translate-x-1 transition-all duration-200"
         >
-
-            <span class="material-symbols-rounded">
+            <span class="material-symbols-rounded text-[22px] leading-none">
                 logout
             </span>
 
             <span>Keluar</span>
-
         </button>
-
-    </div>
+    </form>
+</div>
 
 </aside>
