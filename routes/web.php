@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
+use App\Http\Controllers\Mahasiswa\ProfileController as MahasiswaProfileController;
+use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 
 use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
@@ -79,7 +81,6 @@ Route::middleware(['auth', 'mahasiswa'])
         Route::get('/pengajuan', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan');
 
-        // Alias jika nanti ada link lama yang memakai /pengajuan/create.
         Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan.create');
 
@@ -89,9 +90,21 @@ Route::middleware(['auth', 'mahasiswa'])
         Route::get('/pengajuan/{pengajuan}/success', [MahasiswaPengajuanController::class, 'success'])
             ->name('pengajuan.success');
 
-        Route::view('/riwayat', 'mahasiswa.riwayat.index')
+        Route::get('/pengajuan/{pengajuan}/surat/lihat', [MahasiswaPengajuanController::class, 'lihatSurat'])
+            ->name('pengajuan.surat.lihat');
+
+        Route::get('/pengajuan/{pengajuan}/surat/download', [MahasiswaPengajuanController::class, 'downloadSurat'])
+            ->name('pengajuan.surat.download');
+
+        Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])
             ->name('riwayat');
 
-        Route::view('/profile', 'mahasiswa.profile.index')
+        Route::get('/profile', [MahasiswaProfileController::class, 'index'])
             ->name('profile');
+
+        Route::patch('/profile', [MahasiswaProfileController::class, 'update'])
+            ->name('profile.update');
+
+        Route::patch('/profile/password', [MahasiswaProfileController::class, 'updatePassword'])
+            ->name('profile.password.update');
     });
