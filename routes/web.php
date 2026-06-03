@@ -27,6 +27,11 @@ Route::middleware(['auth', 'admin'])
 
         Route::resource('/jenis-surat', JenisSuratController::class);
 
+        Route::post('/dokumen-syarat/hubungkan', [DokumenSyaratController::class, 'hubungkan'])
+            ->name('dokumen-syarat.hubungkan');
+        Route::post('/dokumen-syarat/putuskan', [DokumenSyaratController::class, 'putuskan'])
+            ->name('dokumen-syarat.putuskan');
+
         Route::resource('/dokumen-syarat', DokumenSyaratController::class);
 
         Route::resource('/prodi', ProdiController::class);
