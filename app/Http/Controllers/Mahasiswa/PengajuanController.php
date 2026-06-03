@@ -20,7 +20,9 @@ class PengajuanController extends Controller
         $user = auth()->user();
         $mahasiswa = $user->mahasiswa()->with('prodi')->first();
 
-        $jenisSurat = JenisSurat::with('dokumenSyarat')
+        $jenisSurat = JenisSurat::with(['dokumenSyarat' => function ($query) {
+                $query->orderBy('nama_dokumen');
+            }])
             ->orderBy('nama_surat')
             ->get();
 
@@ -46,6 +48,7 @@ class PengajuanController extends Controller
             'jenis_surat_id.required' => 'Jenis surat wajib dipilih.',
             'jenis_surat_id.exists' => 'Jenis surat tidak valid.',
             'keperluan.required' => 'Keperluan pengajuan wajib diisi.',
+            'keperluan.min' => 'Keperluan pengajuan minimal 5 karakter.',
         ]);
 
         $mahasiswa = $request->user()->mahasiswa;
@@ -64,20 +67,27 @@ class PengajuanController extends Controller
 
         foreach ($jenisSurat->dokumenSyarat as $dokumen) {
             $key = 'berkas.' . $dokumen->id;
+            $allowedFormats = $this->normalizeAllowedFormats($dokumen->allowed_formats);
+            $maxSizeMb = (int) ($dokumen->max_size ?: 5);
+            $maxSizeKb = $maxSizeMb * 1024;
+            $formatLabel = $this->formatLabel($allowedFormats);
 
             $fileRules[$key] = [
                 'required',
                 'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:5120',
+                'mimes:' . implode(',', $allowedFormats),
+                'max:' . $maxSizeKb,
             ];
 
             $fileMessages[$key . '.required'] = $dokumen->nama_dokumen . ' wajib diunggah.';
-            $fileMessages[$key . '.mimes'] = $dokumen->nama_dokumen . ' harus berformat PDF, JPG, JPEG, atau PNG.';
-            $fileMessages[$key . '.max'] = $dokumen->nama_dokumen . ' maksimal berukuran 5 MB.';
+            $fileMessages[$key . '.file'] = $dokumen->nama_dokumen . ' harus berupa file yang valid.';
+            $fileMessages[$key . '.mimes'] = $dokumen->nama_dokumen . ' harus berformat ' . $formatLabel . '.';
+            $fileMessages[$key . '.max'] = $dokumen->nama_dokumen . ' maksimal berukuran ' . $maxSizeMb . ' MB.';
         }
 
-        $request->validate($fileRules, $fileMessages);
+        if ($fileRules !== []) {
+            $request->validate($fileRules, $fileMessages);
+        }
 
         $pengajuan = DB::transaction(function () use ($request, $validated, $mahasiswa, $jenisSurat) {
             $pengajuan = Pengajuan::create([
@@ -166,5 +176,24 @@ class PengajuanController extends Controller
         $mahasiswa = request()->user()->mahasiswa;
 
         abort_if(! $mahasiswa || $pengajuan->mahasiswa_id !== $mahasiswa->id, 403);
+    }
+
+    private function normalizeAllowedFormats(?string $allowedFormats): array
+    {
+        $formats = collect(explode(',', $allowedFormats ?: 'pdf,jpg,jpeg,png'))
+            ->map(fn ($format) => strtolower(trim(str_replace('.', '', $format))))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return $formats === [] ? ['pdf', 'jpg', 'jpeg', 'png'] : $formats;
+    }
+
+    private function formatLabel(array $formats): string
+    {
+        return collect($formats)
+            ->map(fn ($format) => strtoupper($format))
+            ->implode(', ');
     }
 }
