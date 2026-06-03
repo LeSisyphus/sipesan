@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\DokumenSyarat;
 use App\Models\JenisSurat;
+use App\Models\DokumenSyarat;
 use Illuminate\Database\Seeder;
 
 class JenisSuratSeeder extends Seeder
@@ -95,6 +95,25 @@ class JenisSuratSeeder extends Seeder
                     'Kartu Tanda Penduduk (KTP)',
                     'Transkrip Nilai Sementara',
                     'Pas Foto',
+                ],
+            ],
+            [
+                'nama_surat' => 'Surat Cuti Akademik',
+                'deskripsi' => 'Surat izin resmi untuk menghentikan studi sementara untuk jangka waktu tertentu.',
+                'template_isi' => 'Memberikan izin cuti akademik kepada mahasiswa berikut...',
+                'dokumen_syarat' => [
+                    'Kartu Tanda Mahasiswa (KTM)',
+                    'Bukti Pembayaran UKT',
+                ],
+            ],
+            [
+                'nama_surat' => 'Surat Pengunduran Diri',
+                'deskripsi' => 'Surat pernyataan resmi pengunduran diri secara hormat sebagai mahasiswa.',
+                'template_isi' => 'Menerangkan pengunduran diri mahasiswa...',
+                'dokumen_syarat' => [
+                    'Kartu Tanda Mahasiswa (KTM)',
+                    'Kartu Tanda Penduduk (KTP)',
+                    'Bukti Pembayaran UKT',
                 ],
             ],
         ];
