@@ -13,9 +13,6 @@ class DokumenSyarat extends Model
         'keterangan',
         'allowed_formats',
         'max_size',
-        'is_wajib',
-        'berlaku_untuk',
-        'urutan',
     ];
 
     public function jenisSurat()
