@@ -9,17 +9,28 @@ use App\Models\PengajuanDokumen;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PengajuanController extends Controller
 {
     public function create(): View
     {
-        $jenisSurat = JenisSurat::with('dokumenSyarat')
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa()->with('prodi')->first();
+
+        $jenisSurat = JenisSurat::with(['dokumenSyarat' => function ($query) {
+                $query->orderBy('nama_dokumen');
+            }])
             ->orderBy('nama_surat')
             ->get();
 
-        return view('mahasiswa.pengajuan.create', compact('jenisSurat'));
+        return view('mahasiswa.pengajuan.index', compact(
+            'user',
+            'mahasiswa',
+            'jenisSurat'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,6 +48,7 @@ class PengajuanController extends Controller
             'jenis_surat_id.required' => 'Jenis surat wajib dipilih.',
             'jenis_surat_id.exists' => 'Jenis surat tidak valid.',
             'keperluan.required' => 'Keperluan pengajuan wajib diisi.',
+            'keperluan.min' => 'Keperluan pengajuan minimal 5 karakter.',
         ]);
 
         $mahasiswa = $request->user()->mahasiswa;
@@ -55,20 +67,27 @@ class PengajuanController extends Controller
 
         foreach ($jenisSurat->dokumenSyarat as $dokumen) {
             $key = 'berkas.' . $dokumen->id;
+            $allowedFormats = $this->normalizeAllowedFormats($dokumen->allowed_formats);
+            $maxSizeMb = (int) ($dokumen->max_size ?: 5);
+            $maxSizeKb = $maxSizeMb * 1024;
+            $formatLabel = $this->formatLabel($allowedFormats);
 
             $fileRules[$key] = [
                 'required',
                 'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:5120',
+                'mimes:' . implode(',', $allowedFormats),
+                'max:' . $maxSizeKb,
             ];
 
             $fileMessages[$key . '.required'] = $dokumen->nama_dokumen . ' wajib diunggah.';
-            $fileMessages[$key . '.mimes'] = $dokumen->nama_dokumen . ' harus berformat PDF, JPG, JPEG, atau PNG.';
-            $fileMessages[$key . '.max'] = $dokumen->nama_dokumen . ' maksimal berukuran 5 MB.';
+            $fileMessages[$key . '.file'] = $dokumen->nama_dokumen . ' harus berupa file yang valid.';
+            $fileMessages[$key . '.mimes'] = $dokumen->nama_dokumen . ' harus berformat ' . $formatLabel . '.';
+            $fileMessages[$key . '.max'] = $dokumen->nama_dokumen . ' maksimal berukuran ' . $maxSizeMb . ' MB.';
         }
 
-        $request->validate($fileRules, $fileMessages);
+        if ($fileRules !== []) {
+            $request->validate($fileRules, $fileMessages);
+        }
 
         $pengajuan = DB::transaction(function () use ($request, $validated, $mahasiswa, $jenisSurat) {
             $pengajuan = Pengajuan::create([
@@ -119,10 +138,62 @@ class PengajuanController extends Controller
 
     public function success(Pengajuan $pengajuan): View
     {
+        $this->authorizeOwner($pengajuan);
+
+        $pengajuan->load('jenisSurat');
+
+        return view('mahasiswa.pengajuan.success', compact('pengajuan'));
+    }
+
+    public function lihatSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        $this->authorizeOwner($pengajuan);
+
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->response(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad((string) $pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
+        );
+    }
+
+    public function downloadSurat(Pengajuan $pengajuan): StreamedResponse
+    {
+        $this->authorizeOwner($pengajuan);
+
+        abort_unless($pengajuan->file_surat, 404);
+        abort_unless(Storage::disk('public')->exists($pengajuan->file_surat), 404);
+
+        return Storage::disk('public')->download(
+            $pengajuan->file_surat,
+            'surat-final-' . str_pad((string) $pengajuan->id, 4, '0', STR_PAD_LEFT) . '.pdf'
+        );
+    }
+
+    private function authorizeOwner(Pengajuan $pengajuan): void
+    {
         $mahasiswa = request()->user()->mahasiswa;
 
         abort_if(! $mahasiswa || $pengajuan->mahasiswa_id !== $mahasiswa->id, 403);
+    }
 
-        return view('mahasiswa.pengajuan.success', compact('pengajuan'));
+    private function normalizeAllowedFormats(?string $allowedFormats): array
+    {
+        $formats = collect(explode(',', $allowedFormats ?: 'pdf,jpg,jpeg,png'))
+            ->map(fn ($format) => strtolower(trim(str_replace('.', '', $format))))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return $formats === [] ? ['pdf', 'jpg', 'jpeg', 'png'] : $formats;
+    }
+
+    private function formatLabel(array $formats): string
+    {
+        return collect($formats)
+            ->map(fn ($format) => strtoupper($format))
+            ->implode(', ');
     }
 }

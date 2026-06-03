@@ -13,21 +13,28 @@ class Mahasiswa extends Model
         'prodi_id',
         'angkatan',
         'no_hp',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'alamat',
+        'email_alternatif',
+        'kontak_darurat',
     ];
 
-    // Relasi ke User (pemilik akun)
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Prodi
     public function prodi()
     {
         return $this->belongsTo(Prodi::class);
     }
 
-    // Relasi One-to-Many: satu mahasiswa punya banyak pengajuan
     public function pengajuan()
     {
         return $this->hasMany(Pengajuan::class);

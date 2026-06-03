@@ -226,7 +226,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     title: 'Gagal',
-                    text: @json(session('errorr')),
+                    text: @json(session('error')),
                     icon: 'error',
                     confirmButtonColor: '#0058bc',
                     confirmButtonText: 'Oke',
@@ -411,7 +411,17 @@
 
                             <td class="p-6 text-center">
     @php
-                                    $dokumenPertama = $item->dokumen->first();
+                                    $dokumenPemohon = $item->dokumen->map(function ($dokumen) {
+                                        return [
+                                            'nama' => $dokumen->dokumenSyarat->nama_dokumen ?? 'Dokumen Pemohon',
+                                            'original_name' => $dokumen->original_name ?? 'Dokumen Pemohon',
+                                            'file_size' => $dokumen->file_size
+                                                ? number_format($dokumen->file_size / 1024, 1) . ' KB'
+                                                : '-',
+                                            'lihat_url' => route('admin.pengajuan.dokumen.lihat', $dokumen->id),
+                                            'download_url' => route('admin.pengajuan.dokumen.download', $dokumen->id),
+                                        ];
+                                    })->values();
 
                                     $detailPengajuan = [
                                         'id' => '#REQ-' . str_pad($item->id, 4, '0', STR_PAD_LEFT),
@@ -436,15 +446,7 @@
                                             ? route('admin.pengajuan.surat.hapus', $item->id)
                                             : null,
                                         'update_url' => route('admin.pengajuan.update', $item->id),
-                                        'dokumen_pemohon' => $dokumenPertama ? [
-                                            'nama' => $dokumenPertama->dokumenSyarat->nama_dokumen ?? 'Dokumen Pemohon',
-                                            'original_name' => $dokumenPertama->original_name ?? 'Dokumen Pemohon',
-                                            'file_size' => $dokumenPertama->file_size
-                                                ? number_format($dokumenPertama->file_size / 1024, 1) . ' KB'
-                                                : '-',
-                                            'lihat_url' => route('admin.pengajuan.dokumen.lihat', $dokumenPertama->id),
-                                            'download_url' => route('admin.pengajuan.dokumen.download', $dokumenPertama->id),
-                                        ] : null,
+                                        'dokumen_pemohon' => $dokumenPemohon,
                                     ];
                                 @endphp
 
@@ -588,53 +590,52 @@
                     </p>
 
                     <div class="space-y-4">
-                        <div class="rounded-2xl bg-white/50 border border-white/60 overflow-hidden">
-                            <div class="flex items-center justify-between p-4 border-b border-slate-100">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-[20px]">
-                                            picture_as_pdf
-                                        </span>
+                        <template x-if="selectedPengajuan?.dokumen_pemohon?.length > 0">
+                            <div class="space-y-4">
+                                <template x-for="dokumen in selectedPengajuan.dokumen_pemohon" :key="dokumen.download_url">
+                                    <div class="rounded-2xl bg-white/50 border border-white/60 overflow-hidden">
+                                        <div class="flex items-center justify-between gap-4 p-4 border-b border-slate-100">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                                    <span class="material-symbols-outlined text-[20px]">
+                                                        description
+                                                    </span>
+                                                </div>
+
+                                                <div class="min-w-0">
+                                                    <p class="text-[14px] font-medium text-slate-800 truncate" x-text="dokumen.nama ?? 'Dokumen Pemohon'"></p>
+                                                    <p class="text-xs text-slate-400 truncate" x-text="dokumen.original_name ?? 'Belum tersedia'"></p>
+                                                    <p class="text-[11px] text-slate-400 mt-0.5" x-text="dokumen.file_size ?? '-'"></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <a
+                                                    :href="dokumen.lihat_url ?? '#'"
+                                                    target="_blank"
+                                                    class="px-3 py-2 rounded-xl bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors border border-slate-200"
+                                                >
+                                                    Lihat
+                                                </a>
+
+                                                <a
+                                                    :href="dokumen.download_url ?? '#'"
+                                                    class="px-3 py-2 rounded-xl bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100 transition-colors"
+                                                >
+                                                    Download
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div>
-                                        <p class="text-[14px] font-medium text-slate-800" x-text="selectedPengajuan?.dokumen_pemohon?.nama ?? 'Dokumen Pemohon'">
-                                        </p>
-
-                                        <p class="text-xs text-slate-400" x-text="selectedPengajuan?.dokumen_pemohon?.original_name ?? 'Belum tersedia'">
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <a
-                                    :href="selectedPengajuan?.dokumen_pemohon?.download_url ?? '#'"
-                                    class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100 transition-colors"
-                                >
-                                    Download
-                                </a>
+                                </template>
                             </div>
+                        </template>
 
-                            <div class="aspect-video bg-slate-100 flex items-center justify-center">
-                                <div class="text-center">
-                                    <span class="material-symbols-outlined text-[64px] text-slate-300">
-                                        description
-                                    </span>
-
-                                    <p class="text-sm text-slate-400 mt-2">
-                                        Preview Dokumen
-                                    </p>
-
-                                    <a
-                                        x-show="selectedPengajuan?.dokumen_pemohon?.lihat_url"
-                                        :href="selectedPengajuan?.dokumen_pemohon?.lihat_url ?? '#'"
-                                        target="_blank"
-                                        class="inline-flex mt-3 px-4 py-2 rounded-xl bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors border border-slate-200"
-                                    >
-                                        Lihat Dokumen
-                                    </a>
-                                </div>
+                        <template x-if="! selectedPengajuan?.dokumen_pemohon || selectedPengajuan.dokumen_pemohon.length === 0">
+                            <div class="rounded-2xl bg-white/50 border border-white/60 p-5 text-center text-slate-400">
+                                Belum ada dokumen pemohon yang terunggah.
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </section>
 

@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
+use App\Http\Controllers\Mahasiswa\ProfileController as MahasiswaProfileController;
+use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 
 use App\Http\Controllers\Admin\JenisSuratController;
 use App\Http\Controllers\Admin\DokumenSyaratController;
@@ -27,15 +29,14 @@ Route::middleware(['auth', 'admin'])
 
         Route::resource('/jenis-surat', JenisSuratController::class);
 
+        Route::post('/dokumen-syarat/hubungkan', [DokumenSyaratController::class, 'hubungkan'])
+            ->name('dokumen-syarat.hubungkan');
+        Route::post('/dokumen-syarat/putuskan', [DokumenSyaratController::class, 'putuskan'])
+            ->name('dokumen-syarat.putuskan');
+
         Route::resource('/dokumen-syarat', DokumenSyaratController::class);
 
         Route::resource('/prodi', ProdiController::class);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Temporary Dummy Routes
-        |--------------------------------------------------------------------------
-        */
 
         Route::get('/pengajuan', [PengajuanController::class, 'index'])
             ->name('pengajuan.index');
@@ -63,8 +64,10 @@ Route::middleware(['auth', 'admin'])
         
         Route::get('/akun-mahasiswa', [\App\Http\Controllers\Admin\MahasiswaController::class, 'index'])
             ->name('akun-mahasiswa.index');
+
         Route::patch('/akun-mahasiswa/{id}/reset-password', [\App\Http\Controllers\Admin\MahasiswaController::class, 'resetPassword'])
             ->name('akun-mahasiswa.reset-password');
+
         Route::patch('/akun-mahasiswa/{id}/toggle-status', [\App\Http\Controllers\Admin\MahasiswaController::class, 'toggleStatus'])
             ->name('akun-mahasiswa.toggle-status');
         
@@ -80,14 +83,9 @@ Route::middleware(['auth', 'mahasiswa'])
         Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])
             ->name('dashboard');
 
-        Route::view('/pengajuan', 'mahasiswa.pengajuan.index')
+        Route::get('/pengajuan', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan');
 
-        Route::view('/riwayat', 'mahasiswa.riwayat.index')
-            ->name('riwayat');
-
-        Route::view('/profile', 'mahasiswa.profile.index')
-            ->name('profile');
         Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])
             ->name('pengajuan.create');
 
@@ -96,4 +94,22 @@ Route::middleware(['auth', 'mahasiswa'])
 
         Route::get('/pengajuan/{pengajuan}/success', [MahasiswaPengajuanController::class, 'success'])
             ->name('pengajuan.success');
+
+        Route::get('/pengajuan/{pengajuan}/surat/lihat', [MahasiswaPengajuanController::class, 'lihatSurat'])
+            ->name('pengajuan.surat.lihat');
+
+        Route::get('/pengajuan/{pengajuan}/surat/download', [MahasiswaPengajuanController::class, 'downloadSurat'])
+            ->name('pengajuan.surat.download');
+
+        Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])
+            ->name('riwayat');
+
+        Route::get('/profile', [MahasiswaProfileController::class, 'index'])
+            ->name('profile');
+
+        Route::patch('/profile', [MahasiswaProfileController::class, 'update'])
+            ->name('profile.update');
+
+        Route::patch('/profile/password', [MahasiswaProfileController::class, 'updatePassword'])
+            ->name('profile.password.update');
     });

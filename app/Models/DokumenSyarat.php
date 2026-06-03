@@ -11,6 +11,8 @@ class DokumenSyarat extends Model
     protected $fillable = [
         'nama_dokumen',
         'keterangan',
+        'allowed_formats',
+        'max_size',
     ];
 
     public function jenisSurat()
