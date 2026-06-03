@@ -3,170 +3,171 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\DokumenSyarat;
 use App\Models\JenisSurat;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DokumenSyaratController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $jenisSurats = JenisSurat::with('dokumenSyarat')->orderBy('nama_surat')->get();
+        $jenisSurats = JenisSurat::with(['dokumenSyarat' => function ($query) {
+                $query->orderBy('nama_dokumen');
+            }])
+            ->orderBy('nama_surat')
+            ->get();
+
         $dokumenSyarats = DokumenSyarat::orderBy('nama_dokumen')->get();
-        
+
         $totalJenisSurat = JenisSurat::count();
         $totalSyarat = DokumenSyarat::count();
-        $totalWajib = DokumenSyarat::where('is_wajib', true)->count();
-        $totalOpsional = DokumenSyarat::where('is_wajib', false)->count();
+        $totalRelasi = $jenisSurats->sum(fn ($jenisSurat) => $jenisSurat->dokumenSyarat->count());
 
         return view('admin.dokumen-syarat.index', compact(
             'jenisSurats',
             'dokumenSyarats',
             'totalJenisSurat',
             'totalSyarat',
-            'totalWajib',
-            'totalOpsional'
+            'totalRelasi'
         ));
     }
 
-    /**
-     * gak kepakai
-     */
-    public function create()
+    public function create(): View
     {
         return view('admin.dokumen-syarat.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'nama_dokumen' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
-            'allowed_formats' => 'required|array',
-            'allowed_formats.*' => 'string|in:pdf,jpg,png,docx',
-            'max_size' => 'required|integer|in:2,5,10,20',
-            'is_wajib' => 'required|boolean',
-            'berlaku_untuk' => 'required|string|max:255',
-            'urutan' => 'required|integer|min:1',
-            'jenis_surat_id' => 'nullable|exists:jenis_surat,id',
+            'nama_dokumen' => ['required', 'string', 'max:255'],
+            'keterangan' => ['nullable', 'string'],
+            'allowed_formats' => ['required', 'array', 'min:1'],
+            'allowed_formats.*' => ['string', 'in:pdf,jpg,jpeg,png,docx'],
+            'max_size' => ['required', 'integer', 'in:2,5,10,20'],
+            'jenis_surat_id' => ['nullable', 'exists:jenis_surat,id'],
+        ], [
+            'nama_dokumen.required' => 'Nama dokumen wajib diisi.',
+            'allowed_formats.required' => 'Minimal satu format file harus dipilih.',
+            'allowed_formats.*.in' => 'Format file tidak valid.',
+            'max_size.required' => 'Ukuran maksimal wajib dipilih.',
+            'max_size.in' => 'Ukuran maksimal tidak valid.',
+            'jenis_surat_id.exists' => 'Jenis surat tidak valid.',
         ]);
 
-        $validated['allowed_formats'] = implode(',', $request->allowed_formats);
+        $allowedFormats = collect($validated['allowed_formats'])
+            ->map(fn ($format) => strtolower(trim($format)))
+            ->unique()
+            ->values()
+            ->implode(',');
 
-        $dokumenSyarat = DokumenSyarat::create($validated);
-        
-        // Hubungkan ke jenis surat terkait jika dikirimkan
+        $dokumenSyarat = DokumenSyarat::create([
+            'nama_dokumen' => $validated['nama_dokumen'],
+            'keterangan' => $validated['keterangan'] ?? null,
+            'allowed_formats' => $allowedFormats,
+            'max_size' => $validated['max_size'],
+        ]);
+
         if ($request->filled('jenis_surat_id')) {
-            $dokumenSyarat->jenisSurat()->attach($request->jenis_surat_id);
+            $dokumenSyarat->jenisSurat()->syncWithoutDetaching([
+                $request->integer('jenis_surat_id'),
+            ]);
         }
 
-        return redirect()->route('admin.dokumen-syarat.index')->with('success', 'Dokumen syarat master berhasil ditambahkan.');
+        return redirect()
+            ->route('admin.dokumen-syarat.index')
+            ->with('success', 'Dokumen syarat master berhasil ditambahkan.');
     }
 
-    /**
-     * gak kepakai
-     */
-    public function show($id)
+    public function show($id): View
     {
         $dokumenSyarat = DokumenSyarat::findOrFail($id);
+
         return view('admin.dokumen-syarat.show', compact('dokumenSyarat'));
     }
 
-    /**
-     * gak kepakai
-     */
-    public function edit($id)
+    public function edit($id): View
     {
         $dokumenSyarat = DokumenSyarat::findOrFail($id);
+
         return view('admin.dokumen-syarat.edit', compact('dokumenSyarat'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
         $validated = $request->validate([
-            'nama_dokumen' => 'required|string|max:255',
-            'keterangan' => 'nullable|string',
-            'allowed_formats' => 'required|array',
-            'allowed_formats.*' => 'string|in:pdf,jpg,png,docx',
-            'max_size' => 'required|integer|in:2,5,10,20',
-            'is_wajib' => 'required|boolean',
-            'berlaku_untuk' => 'required|string|max:255',
-            'urutan' => 'required|integer|min:1',
+            'nama_dokumen' => ['required', 'string', 'max:255'],
+            'keterangan' => ['nullable', 'string'],
+            'allowed_formats' => ['required', 'array', 'min:1'],
+            'allowed_formats.*' => ['string', 'in:pdf,jpg,jpeg,png,docx'],
+            'max_size' => ['required', 'integer', 'in:2,5,10,20'],
+        ], [
+            'nama_dokumen.required' => 'Nama dokumen wajib diisi.',
+            'allowed_formats.required' => 'Minimal satu format file harus dipilih.',
+            'allowed_formats.*.in' => 'Format file tidak valid.',
+            'max_size.required' => 'Ukuran maksimal wajib dipilih.',
+            'max_size.in' => 'Ukuran maksimal tidak valid.',
         ]);
 
-        $validated['allowed_formats'] = implode(',', $request->allowed_formats);
+        $allowedFormats = collect($validated['allowed_formats'])
+            ->map(fn ($format) => strtolower(trim($format)))
+            ->unique()
+            ->values()
+            ->implode(',');
 
         $dokumenSyarat = DokumenSyarat::findOrFail($id);
-        $dokumenSyarat->update($validated);
+        $dokumenSyarat->update([
+            'nama_dokumen' => $validated['nama_dokumen'],
+            'keterangan' => $validated['keterangan'] ?? null,
+            'allowed_formats' => $allowedFormats,
+            'max_size' => $validated['max_size'],
+        ]);
 
-        return redirect()->route('admin.dokumen-syarat.index')->with('success', 'Dokumen syarat berhasil diperbarui.');
+        return redirect()
+            ->route('admin.dokumen-syarat.index')
+            ->with('success', 'Dokumen syarat berhasil diperbarui.');
     }
 
-    /**
-     * 
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $dokumenSyarat = DokumenSyarat::findOrFail($id);
-
         $dokumenSyarat->delete();
 
-        return redirect()->route('admin.dokumen-syarat.index')->with('success', 'Dokumen syarat master berhasil dihapus.');
+        return redirect()
+            ->route('admin.dokumen-syarat.index')
+            ->with('success', 'Dokumen syarat master berhasil dihapus.');
     }
 
-    /**
-     * Hubungkan dokumen syarat ke jenis surat (Many-to-Many).
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function hubungkan(Request $request)
+    public function hubungkan(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'jenis_surat_id' => 'required|exists:jenis_surat,id',
-            'dokumen_ids' => 'nullable|array',
-            'dokumen_ids.*' => 'exists:dokumen_syarat,id',
+            'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
+            'dokumen_ids' => ['nullable', 'array'],
+            'dokumen_ids.*' => ['exists:dokumen_syarat,id'],
         ]);
 
         $jenisSurat = JenisSurat::findOrFail($validated['jenis_surat_id']);
-        
-        // Dapatkan data sinkronisasi relasi pivot
         $jenisSurat->dokumenSyarat()->sync($validated['dokumen_ids'] ?? []);
 
-        return redirect()->route('admin.dokumen-syarat.index')->with('success', 'Persyaratan dokumen berhasil diperbarui untuk jenis surat ini.');
+        return redirect()
+            ->route('admin.dokumen-syarat.index')
+            ->with('success', 'Persyaratan dokumen berhasil diperbarui untuk jenis surat ini.');
     }
 
-    /**
-     * Lepas hubungan dokumen syarat dari jenis surat (Many-to-Many).
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function putuskan(Request $request)
+    public function putuskan(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'jenis_surat_id' => 'required|exists:jenis_surat,id',
-            'dokumen_syarat_id' => 'required|exists:dokumen_syarat,id',
+            'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
+            'dokumen_syarat_id' => ['required', 'exists:dokumen_syarat,id'],
         ]);
 
         $jenisSurat = JenisSurat::findOrFail($validated['jenis_surat_id']);
         $jenisSurat->dokumenSyarat()->detach($validated['dokumen_syarat_id']);
 
-        return redirect()->route('admin.dokumen-syarat.index')->with('success', 'Hubungan dokumen syarat berhasil dilepas.');
+        return redirect()
+            ->route('admin.dokumen-syarat.index')
+            ->with('success', 'Hubungan dokumen syarat berhasil dilepas.');
     }
 }

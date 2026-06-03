@@ -14,6 +14,8 @@
                     'id' => (string) $dokumen->id,
                     'nama_dokumen' => $dokumen->nama_dokumen,
                     'keterangan' => $dokumen->keterangan,
+                    'allowed_formats' => $dokumen->allowed_formats ?: 'pdf,jpg,jpeg,png',
+                    'max_size' => (int) ($dokumen->max_size ?: 5),
                 ];
             })->values(),
         ];
@@ -437,9 +439,10 @@
 
                             <div>
                                 <h3 class="font-bold text-slate-800" x-text="dokumen.nama_dokumen"></h3>
-                                <p class="text-sm text-slate-500 mt-1">
-                                    PDF / JPG / PNG, maksimal 5 MB
-                                </p>
+                                <p
+                                    class="text-sm text-slate-500 mt-1"
+                                    x-text="getUploadRuleText(dokumen)"
+                                ></p>
                                 <p class="text-xs text-slate-400 mt-1" x-show="dokumen.keterangan" x-text="dokumen.keterangan"></p>
                             </div>
 
@@ -448,7 +451,8 @@
                                 class="hidden"
                                 :id="`berkas-${dokumen.id}`"
                                 :name="`berkas[${dokumen.id}]`"
-                                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                :accept="getAcceptedFileTypes(dokumen)"
+                                required
                                 @change="handleFileChange($event, dokumen)"
                             >
 
@@ -550,10 +554,60 @@
                 this.uploadedFiles = {};
             },
 
+            getAllowedFormats(dokumen) {
+                const formats = dokumen.allowed_formats || 'pdf,jpg,jpeg,png';
+
+                if (Array.isArray(formats)) {
+                    return formats
+                        .map((format) => String(format).trim().replace('.', '').toLowerCase())
+                        .filter(Boolean);
+                }
+
+                return formats
+                    .split(',')
+                    .map((format) => format.trim().replace('.', '').toLowerCase())
+                    .filter(Boolean);
+            },
+
+            getUploadRuleText(dokumen) {
+                const formats = this.getAllowedFormats(dokumen)
+                    .map((format) => format.toUpperCase())
+                    .join(' / ');
+
+                const maxSize = Number(dokumen.max_size || 5);
+
+                return `${formats}, maksimal ${maxSize} MB`;
+            },
+
+            getAcceptedFileTypes(dokumen) {
+                return this.getAllowedFormats(dokumen)
+                    .map((format) => `.${format}`)
+                    .join(',');
+            },
+
             handleFileChange(event, dokumen) {
                 const file = event.target.files[0];
 
                 if (! file) {
+                    delete this.uploadedFiles[dokumen.id];
+                    return;
+                }
+
+                const allowedFormats = this.getAllowedFormats(dokumen);
+                const maxSizeMb = Number(dokumen.max_size || 5);
+                const maxSizeBytes = maxSizeMb * 1024 * 1024;
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                if (! allowedFormats.includes(extension)) {
+                    alert(`Format file ${dokumen.nama_dokumen} harus ${allowedFormats.map((format) => format.toUpperCase()).join(' / ')}.`);
+                    event.target.value = '';
+                    delete this.uploadedFiles[dokumen.id];
+                    return;
+                }
+
+                if (file.size > maxSizeBytes) {
+                    alert(`Ukuran file ${dokumen.nama_dokumen} maksimal ${maxSizeMb} MB.`);
+                    event.target.value = '';
                     delete this.uploadedFiles[dokumen.id];
                     return;
                 }
