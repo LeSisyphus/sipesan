@@ -55,7 +55,6 @@
             id: null,
             nama_surat: '',
             deskripsi: '',
-            template_isi: '',
             dokumen_syarat_ids: []
         },
 
@@ -65,7 +64,6 @@
                 id: null,
                 nama_surat: '',
                 deskripsi: '',
-                template_isi: '',
                 dokumen_syarat_ids: []
             };
             this.openModal = true;
@@ -77,7 +75,6 @@
                 id: surat.id,
                 nama_surat: surat.nama_surat,
                 deskripsi: surat.deskripsi || '',
-                template_isi: surat.template_isi || '',
                 dokumen_syarat_ids: [...surat.dokumen_syarat_ids]
             };
             this.openModal = true;
@@ -199,7 +196,6 @@
                                     id: {{ $surat->id }},
                                     nama_surat: {{ json_encode($surat->nama_surat) }},
                                     deskripsi: {{ json_encode($surat->deskripsi ?? '') }},
-                                    template_isi: {{ json_encode($surat->template_isi ?? '') }},
                                     dokumen_syarat_ids: {{ json_encode($surat->dokumenSyarat->pluck('id')->toArray()) }}
                                 })"
                                 class="w-10 h-10 rounded-full hover:bg-primary/10 text-primary transition-all flex items-center justify-center"
@@ -270,6 +266,9 @@
         >
             @csrf
             <input type="hidden" name="_method" :value="editMode ? 'PUT' : 'POST'">
+            <template x-for="id in selectedSurat.dokumen_syarat_ids" :key="id">
+                <input type="hidden" name="dokumen_syarat_ids[]" :value="id">
+            </template>
 
             <!-- HEADER -->
             <div class="px-8 py-6 border-b border-outline-variant/20 flex justify-between items-center">
