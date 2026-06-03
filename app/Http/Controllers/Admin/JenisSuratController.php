@@ -12,7 +12,8 @@ class JenisSuratController extends Controller
     public function index()
     {
         $jenisSurats = JenisSurat::with('dokumenSyarat')->orderBy('nama_surat')->get();
-        return view('admin.jenis-surat.index', compact('jenisSurats'));
+        $dokumenSyarats = DokumenSyarat::orderBy('nama_dokumen')->get();
+        return view('admin.jenis-surat.index', compact('jenisSurats', 'dokumenSyarats'));
     }
 
     public function create()
