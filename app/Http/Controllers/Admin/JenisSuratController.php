@@ -26,17 +26,14 @@ class JenisSuratController extends Controller
         $validated = $request->validate([
             'nama_surat' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'template_isi' => 'nullable|string',
             'dokumen_syarat_ids' => 'nullable|array',
             'dokumen_syarat_ids.*' => 'exists:dokumen_syarat,id',
         ]);
 
         $jenisSurat = JenisSurat::create($validated);
 
-        // Sync relasi Many-to-Many ke tabel pivot jenis_surat_syarat jika dikirimkan
-        if ($request->has('dokumen_syarat_ids')) {
-            $jenisSurat->dokumenSyarat()->sync($request->dokumen_syarat_ids);
-        }
+        // Sync relasi Many-to-Many ke tabel pivot jenis_surat_syarat
+        $jenisSurat->dokumenSyarat()->sync($request->dokumen_syarat_ids ?? []);
 
         return redirect()->route('admin.jenis-surat.index')->with('success', 'Jenis surat berhasil ditambahkan.');
     }
@@ -54,7 +51,6 @@ class JenisSuratController extends Controller
         $validated = $request->validate([
             'nama_surat' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'template_isi' => 'nullable|string',
             'dokumen_syarat_ids' => 'nullable|array',
             'dokumen_syarat_ids.*' => 'exists:dokumen_syarat,id',
         ]);
@@ -62,10 +58,8 @@ class JenisSuratController extends Controller
         $jenisSurat = JenisSurat::findOrFail($id);
         $jenisSurat->update($validated);
 
-        // Sync ulang relasi Many-to-Many jika dikirimkan
-        if ($request->has('dokumen_syarat_ids')) {
-            $jenisSurat->dokumenSyarat()->sync($request->dokumen_syarat_ids);
-        }
+        // Sync ulang relasi Many-to-Many
+        $jenisSurat->dokumenSyarat()->sync($request->dokumen_syarat_ids ?? []);
 
         return redirect()->route('admin.jenis-surat.index')->with('success', 'Jenis surat berhasil diperbarui.');
     }
