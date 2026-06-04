@@ -4,11 +4,22 @@
 
 @section('content')
 
+<script>
+    window.laporanData = {
+        periode: @json($from_date && $to_date ? '' : $periode),
+        chartDataBulanan: @json($chartDataBulanan),
+        chartDataMingguan: @json($chartDataMingguan),
+        csvContent: @json($csvContent)
+    };
+</script>
+
 <main
     class="ml-0 md:ml-64 min-h-screen flex flex-col pt-24"
     x-data="{
-    activePeriod: '7 Hari',
+    activePeriod: window.laporanData.periode,
     chartMode: 'bulanan',
+    chartDataBulanan: window.laporanData.chartDataBulanan,
+    chartDataMingguan: window.laporanData.chartDataMingguan,
 
     exportPDF() {
         window.print()
@@ -19,11 +30,7 @@
     },
 
     exportExcel() {
-
-        const csvContent =
-`Program Studi,Total,Selesai,Diproses,Menunggu
-Teknik Informatika,620,530,58,32
-Sistem Informasi,420,350,40,30`
+        const csvContent = window.laporanData.csvContent;
 
         const blob = new Blob([csvContent], {
             type: 'text/csv;charset=utf-8;'
@@ -101,113 +108,129 @@ Sistem Informasi,420,350,40,30`
 
         </div>
 
-        {{-- FILTER BAR --}}
-        <div class="glass-panel rounded-[24px] p-4 flex flex-wrap xl:flex-nowrap items-end gap-5">
+        <form id="filterForm" method="GET" action="{{ route('admin.laporan.index') }}" class="w-full">
+            <input type="hidden" name="periode" :value="activePeriod">
+            
+            <div class="glass-panel rounded-[24px] p-4 flex flex-wrap xl:flex-nowrap items-end gap-5">
 
-            {{-- PERIODE --}}
-            <div class="space-y-2">
+                {{-- PERIODE --}}
+                <div class="space-y-2">
 
-                <label class="text-xs font-semibold text-slate-500">
-                    Periode
-                </label>
+                    <label class="text-xs font-semibold text-slate-500">
+                        Periode
+                    </label>
 
-                <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2">
 
-                    {{-- 7 HARI --}}
-                    <button
-                        @click="activePeriod = '7 Hari'"
-                        :class="activePeriod === '7 Hari'
-                            ? 'bg-blue-600 text-white'
-                            : 'glass-panel text-slate-600'"
-                        class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                        {{-- 7 HARI --}}
+                        <button
+                            type="button"
+                            @click="activePeriod = '7 Hari'; document.getElementsByName('from_date')[0].value = ''; document.getElementsByName('to_date')[0].value = ''; $nextTick(() => document.getElementById('filterForm').submit())"
+                            :class="activePeriod === '7 Hari'
+                                ? 'bg-blue-600 text-white'
+                                : 'glass-panel text-slate-600'"
+                            class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                        >
+                            7 Hari
+                        </button>
+
+                        {{-- 30 HARI --}}
+                        <button
+                            type="button"
+                            @click="activePeriod = '30 Hari'; document.getElementsByName('from_date')[0].value = ''; document.getElementsByName('to_date')[0].value = ''; $nextTick(() => document.getElementById('filterForm').submit())"
+                            :class="activePeriod === '30 Hari'
+                                ? 'bg-blue-600 text-white'
+                                : 'glass-panel text-slate-600'"
+                            class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                        >
+                            30 Hari
+                        </button>
+
+                        {{-- 3 BULAN --}}
+                        <button
+                            type="button"
+                            @click="activePeriod = '3 Bulan'; document.getElementsByName('from_date')[0].value = ''; document.getElementsByName('to_date')[0].value = ''; $nextTick(() => document.getElementById('filterForm').submit())"
+                            :class="activePeriod === '3 Bulan'
+                                ? 'bg-blue-600 text-white'
+                                : 'glass-panel text-slate-600'"
+                            class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                        >
+                            3 Bulan
+                        </button>
+
+                        {{-- 1 TAHUN --}}
+                        <button
+                            type="button"
+                            @click="activePeriod = '1 Tahun'; document.getElementsByName('from_date')[0].value = ''; document.getElementsByName('to_date')[0].value = ''; $nextTick(() => document.getElementById('filterForm').submit())"
+                            :class="activePeriod === '1 Tahun'
+                                ? 'bg-blue-600 text-white'
+                                : 'glass-panel text-slate-600'"
+                            class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                        >
+                            1 Tahun
+                        </button>
+
+                    </div>
+
+                </div>
+
+                {{-- DATE --}}
+                <div class="space-y-2">
+
+                    <label class="text-xs font-semibold text-slate-500">
+                        Dari Tanggal
+                    </label>
+
+                    <input
+                        type="date"
+                        name="from_date"
+                        value="{{ $from_date }}"
+                        onchange="this.form.submit()"
+                        class="glass-input rounded-xl px-4 py-2 text-sm"
                     >
-                        7 Hari
-                    </button>
 
-                    {{-- 30 HARI --}}
-                    <button
-                        @click="activePeriod = '30 Hari'"
-                        :class="activePeriod === '30 Hari'
-                            ? 'bg-blue-600 text-white'
-                            : 'glass-panel text-slate-600'"
-                        class="px-4 py-2 rounded-full text-xs font-semibold transition"
-                    >
-                        30 Hari
-                    </button>
+                </div>
 
-                    {{-- 3 BULAN --}}
-                    <button
-                        @click="activePeriod = '3 Bulan'"
-                        :class="activePeriod === '3 Bulan'
-                            ? 'bg-blue-600 text-white'
-                            : 'glass-panel text-slate-600'"
-                        class="px-4 py-2 rounded-full text-xs font-semibold transition"
-                    >
-                        3 Bulan
-                    </button>
+                <div class="space-y-2">
 
-                    {{-- 1 TAHUN --}}
-                    <button
-                        @click="activePeriod = '1 Tahun'"
-                        :class="activePeriod === '1 Tahun'
-                            ? 'bg-blue-600 text-white'
-                            : 'glass-panel text-slate-600'"
-                        class="px-4 py-2 rounded-full text-xs font-semibold transition"
+                    <label class="text-xs font-semibold text-slate-500">
+                        Sampai Tanggal
+                    </label>
+
+                    <input
+                        type="date"
+                        name="to_date"
+                        value="{{ $to_date }}"
+                        onchange="this.form.submit()"
+                        class="glass-input rounded-xl px-4 py-2 text-sm"
                     >
-                        1 Tahun
-                    </button>
+
+                </div>
+
+                {{-- PRODI --}}
+                <div class="space-y-2 min-w-[240px]">
+
+                    <label class="text-xs font-semibold text-slate-500">
+                        Program Studi
+                    </label>
+
+                    <select
+                        name="prodi_id"
+                        onchange="this.form.submit()"
+                        class="glass-input rounded-xl px-4 py-2 text-sm min-w-[220px]"
+                    >
+                        <option value="Semua Prodi" {{ $prodiId == 'Semua Prodi' ? 'selected' : '' }}>Semua Prodi</option>
+                        @foreach($allProdis as $prodi)
+                            <option value="{{ $prodi->id }}" {{ $prodiId == $prodi->id ? 'selected' : '' }}>
+                                {{ $prodi->jenjang }} {{ $prodi->nama_prodi }}
+                            </option>
+                        @endforeach
+                    </select>
 
                 </div>
 
             </div>
-
-            {{-- DATE --}}
-            <div class="space-y-2">
-
-                <label class="text-xs font-semibold text-slate-500">
-                    Dari Tanggal
-                </label>
-
-                <input
-                    type="date"
-                    class="glass-input rounded-xl px-4 py-2 text-sm"
-                >
-
-            </div>
-
-            <div class="space-y-2">
-
-                <label class="text-xs font-semibold text-slate-500">
-                    Sampai Tanggal
-                </label>
-
-                <input
-                    type="date"
-                    class="glass-input rounded-xl px-4 py-2 text-sm"
-                >
-
-            </div>
-
-            {{-- PRODI --}}
-            <div class="space-y-2 min-w-[240px]">
-
-                <label class="text-xs font-semibold text-slate-500">
-                    Program Studi
-                </label>
-
-                <select
-                    class="glass-input rounded-xl px-4 py-2 text-sm min-w-[220px]"
-                >
-                    <option>Semua Prodi</option>
-                    <option>S1 Teknik Informatika</option>
-                    <option>S1 Sistem Informasi</option>
-                    <option>D3 Manajemen Informatika</option>
-                    <option>S1 Akuntansi</option>
-                </select>
-
-            </div>
-
-        </div>
+        </form>
 
         {{-- KPI CARDS --}}
         <div class="grid grid-cols-2 xl:grid-cols-3 gap-4">
@@ -231,7 +254,7 @@ Sistem Informasi,420,350,40,30`
                         bg-blue-100 text-blue-600
                         text-xs font-bold">
 
-                        +12%
+                        {{ $totalGrowthStr }}
                     </span>
 
                 </div>
@@ -243,14 +266,14 @@ Sistem Informasi,420,350,40,30`
                     </p>
 
                     <h3 class="text-3xl font-bold text-slate-800">
-                        1.248
+                        {{ number_format($totalCurrent, 0, ',', '.') }}
                     </h3>
 
                 </div>
 
                 <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
 
-                    <div class="h-full w-[72%] rounded-full bg-blue-600"></div>
+                    <div class="h-full rounded-full bg-blue-600" style="width: {{ $totalBar }}%"></div>
 
                 </div>
 
@@ -275,7 +298,7 @@ Sistem Informasi,420,350,40,30`
                         bg-green-100 text-green-600
                         text-xs font-bold">
 
-                        +8%
+                        {{ $selesaiGrowthStr }}
                     </span>
 
                 </div>
@@ -287,14 +310,14 @@ Sistem Informasi,420,350,40,30`
                     </p>
 
                     <h3 class="text-3xl font-bold text-slate-800">
-                        932
+                        {{ number_format($selesaiCurrent, 0, ',', '.') }}
                     </h3>
 
                 </div>
 
                 <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
 
-                    <div class="h-full w-[80%] rounded-full bg-green-500"></div>
+                    <div class="h-full rounded-full bg-green-500" style="width: {{ $selesaiBar }}%"></div>
 
                 </div>
 
@@ -319,7 +342,7 @@ Sistem Informasi,420,350,40,30`
                         bg-red-100 text-red-500
                         text-xs font-bold">
 
-                        -3%
+                        {{ $menungguGrowthStr }}
                     </span>
 
                 </div>
@@ -331,14 +354,14 @@ Sistem Informasi,420,350,40,30`
                     </p>
 
                     <h3 class="text-3xl font-bold text-slate-800">
-                        128
+                        {{ number_format($menungguCurrent, 0, ',', '.') }}
                     </h3>
 
                 </div>
 
                 <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
 
-                    <div class="h-full w-[28%] rounded-full bg-red-500"></div>
+                    <div class="h-full rounded-full bg-red-500" style="width: {{ $menungguBar }}%"></div>
 
                 </div>
 
@@ -370,6 +393,7 @@ Sistem Informasi,420,350,40,30`
 
                     {{-- BULANAN --}}
                     <button
+                        type="button"
                         @click="chartMode = 'bulanan'"
                         :class="chartMode === 'bulanan'
                             ? 'bg-blue-600 text-white'
@@ -381,6 +405,7 @@ Sistem Informasi,420,350,40,30`
 
                     {{-- MINGGUAN --}}
                     <button
+                        type="button"
                         @click="chartMode = 'mingguan'"
                         :class="chartMode === 'mingguan'
                             ? 'bg-blue-600 text-white'
@@ -396,38 +421,12 @@ Sistem Informasi,420,350,40,30`
 
                 {{-- FAKE CHART --}}
                 <div class="h-[320px] flex items-end gap-4">
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-100 rounded-t-xl h-[45%]"></div>
-                        <span class="text-xs text-slate-500">Jan</span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-200 rounded-t-xl h-[65%]"></div>
-                        <span class="text-xs text-slate-500">Feb</span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-300 rounded-t-xl h-[80%]"></div>
-                        <span class="text-xs text-slate-500">Mar</span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-500 rounded-t-xl h-[95%]
-                        transition-all hover:brightness-110"></div>
-                        <span class="text-xs text-slate-500">Apr</span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-400 rounded-t-xl h-[72%]"></div>
-                        <span class="text-xs text-slate-500">Mei</span>
-                    </div>
-
-                    <div class="flex-1 flex flex-col items-center gap-3">
-                        <div class="w-full bg-blue-300 rounded-t-xl h-[58%]"></div>
-                        <span class="text-xs text-slate-500">Jun</span>
-                    </div>
-
+                    <template x-for="(item, index) in (chartMode === 'bulanan' ? chartDataBulanan : chartDataMingguan)" :key="index">
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div :class="item.class" :style="`height: ${item.percentage}%`" :title="`Total: ${item.count}`"></div>
+                            <span class="text-xs text-slate-500" x-text="item.label"></span>
+                        </div>
+                    </template>
                 </div>
 
             </div>
@@ -465,7 +464,7 @@ Sistem Informasi,420,350,40,30`
                             <div class="text-center">
 
                                 <h3 class="text-3xl font-bold text-slate-800">
-                                    75%
+                                    {{ $selesaiPct }}%
                                 </h3>
 
                                 <p class="text-xs text-slate-500">
@@ -496,7 +495,7 @@ Sistem Informasi,420,350,40,30`
                         </div>
 
                         <span class="text-sm font-bold text-slate-700">
-                            18%
+                            {{ $diprosesPct }}%
                         </span>
 
                     </div>
@@ -514,7 +513,7 @@ Sistem Informasi,420,350,40,30`
                         </div>
 
                         <span class="text-sm font-bold text-slate-700">
-                            75%
+                            {{ $selesaiPct }}%
                         </span>
 
                     </div>
@@ -532,7 +531,7 @@ Sistem Informasi,420,350,40,30`
                         </div>
 
                         <span class="text-sm font-bold text-slate-700">
-                            7%
+                            {{ $ditolakPct }}%
                         </span>
 
                     </div>
@@ -596,26 +595,27 @@ Sistem Informasi,420,350,40,30`
 
                     <tbody class="divide-y divide-[#EDF2F7]">
 
+                        @forelse ($rekapProdi as $rekap)
                         <tr class="hover:bg-[#F8FAFC] transition">
 
                             <td class="px-6 py-5 font-semibold text-slate-800">
-                                Teknik Informatika
+                                {{ $rekap['nama_prodi'] }}
                             </td>
 
                             <td class="px-6 py-5 text-center font-bold text-slate-800">
-                                620
+                                {{ number_format($rekap['total'], 0, ',', '.') }}
                             </td>
 
                             <td class="px-6 py-5 text-center text-green-600 font-semibold">
-                                530
+                                {{ number_format($rekap['selesai'], 0, ',', '.') }}
                             </td>
 
                             <td class="px-6 py-5 text-center text-blue-600 font-semibold">
-                                58
+                                {{ number_format($rekap['diproses'], 0, ',', '.') }}
                             </td>
 
                             <td class="px-6 py-5 text-center text-red-500 font-semibold">
-                                32
+                                {{ number_format($rekap['menunggu'], 0, ',', '.') }}
                             </td>
 
                             <td class="px-6 py-5">
@@ -624,12 +624,12 @@ Sistem Informasi,420,350,40,30`
 
                                     <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
 
-                                        <div class="h-full w-[86%] bg-green-500 rounded-full"></div>
+                                        <div class="h-full bg-green-500 rounded-full" style="width: {{ $rekap['completion_rate'] }}%"></div>
 
                                     </div>
 
                                     <span class="text-xs font-bold text-green-600">
-                                        86%
+                                        {{ $rekap['completion_rate'] }}%
                                     </span>
 
                                 </div>
@@ -637,6 +637,13 @@ Sistem Informasi,420,350,40,30`
                             </td>
 
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-500 italic">
+                                Belum ada data pengajuan untuk filter terpilih.
+                            </td>
+                        </tr>
+                        @endforelse
 
                     </tbody>
 
