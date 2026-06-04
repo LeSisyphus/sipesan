@@ -26,7 +26,6 @@ class JenisSuratController extends Controller
         $validated = $request->validate([
             'nama_surat' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'template_isi' => 'nullable|string',
             'dokumen_syarat_ids' => 'nullable|array',
             'dokumen_syarat_ids.*' => 'exists:dokumen_syarat,id',
         ]);
@@ -52,7 +51,6 @@ class JenisSuratController extends Controller
         $validated = $request->validate([
             'nama_surat' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'template_isi' => 'nullable|string',
             'dokumen_syarat_ids' => 'nullable|array',
             'dokumen_syarat_ids.*' => 'exists:dokumen_syarat,id',
         ]);

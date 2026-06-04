@@ -11,7 +11,6 @@ class JenisSurat extends Model
     protected $fillable = [
         'nama_surat',
         'deskripsi',
-        'template_isi',
     ];
 
     // Relasi One-to-Many: satu jenis surat punya banyak pengajuan
