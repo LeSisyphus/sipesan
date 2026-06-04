@@ -12,6 +12,13 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'from_date' => 'nullable|date',
+            'to_date' => 'nullable|date|after_or_equal:from_date',
+        ], [
+            'to_date.after_or_equal' => 'Rentang Tanggal tidak valid.',
+        ]);
+
         $periode = $request->query('periode', '7 Hari');
         $from_date = $request->query('from_date');
         $to_date = $request->query('to_date');
