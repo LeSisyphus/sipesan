@@ -13,10 +13,11 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'from_date' => 'nullable|date',
+            'from_date' => 'nullable|date|before_or_equal:to_date',
             'to_date' => 'nullable|date|after_or_equal:from_date',
         ], [
-            'to_date.after_or_equal' => 'Rentang Tanggal tidak valid.',
+            'from_date.before_or_equal' => 'Dari tanggal tidak boleh lebih besar dari sampai tanggal.',
+            'to_date.after_or_equal' => 'Sampai tanggal tidak boleh lebih rendah dari dari tanggal.',
         ]);
 
         $periode = $request->query('periode', '7 Hari');
@@ -114,7 +115,7 @@ class LaporanController extends Controller
         // Chart Data Tren Pengajuan 
         // Bulanan (6 bulan terakhir)
         $chartDataBulanan = [];
-        $bgClasses = ['bg-blue-100', 'bg-blue-200', 'bg-blue-300', 'bg-blue-500', 'bg-blue-400', 'bg-blue-300'];
+        $bgColors = ['#dbeafe', '#bfdbfe', '#93c5fd', '#3b82f6', '#60a5fa', '#93c5fd'];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $startOfMonth = (clone $month)->startOfMonth();
@@ -130,7 +131,8 @@ class LaporanController extends Controller
         foreach ($chartDataBulanan as $key => $data) {
             $pct = round(($data['count'] / $maxMonthCount) * 100);
             $chartDataBulanan[$key]['percentage'] = max($pct, 15); 
-            $chartDataBulanan[$key]['class'] = 'w-full rounded-t-xl transition-all hover:brightness-110 ' . ($bgClasses[$key] ?? 'bg-blue-500');
+            $chartDataBulanan[$key]['color'] = $bgColors[$key] ?? '#3b82f6';
+            $chartDataBulanan[$key]['class'] = 'w-full rounded-t-xl transition-all hover:brightness-110';
         }
 
         // Mingguan (6 minggu terakhir)
@@ -149,7 +151,8 @@ class LaporanController extends Controller
         foreach ($chartDataMingguan as $key => $data) {
             $pct = round(($data['count'] / $maxWeekCount) * 100);
             $chartDataMingguan[$key]['percentage'] = max($pct, 15);
-            $chartDataMingguan[$key]['class'] = 'w-full rounded-t-xl transition-all hover:brightness-110 ' . ($bgClasses[$key] ?? 'bg-blue-500');
+            $chartDataMingguan[$key]['color'] = $bgColors[$key] ?? '#3b82f6';
+            $chartDataMingguan[$key]['class'] = 'w-full rounded-t-xl transition-all hover:brightness-110';
         }
 
         // Donut Chart Data Distribusi Status
@@ -162,6 +165,8 @@ class LaporanController extends Controller
             $diprosesPct = 0;
             $ditolakPct = 0;
         }
+        $diprosesEnd = $diprosesPct;
+        $selesaiEnd = $diprosesPct + $selesaiPct;
 
         // Rekap per Prodi
         $allProdis = Prodi::orderBy('nama_prodi')->get();
@@ -228,6 +233,8 @@ class LaporanController extends Controller
             'selesaiPct',
             'diprosesPct',
             'ditolakPct',
+            'diprosesEnd',
+            'selesaiEnd',
             'rekapProdi',
             'csvContent'
         ));

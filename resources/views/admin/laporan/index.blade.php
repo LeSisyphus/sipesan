@@ -465,8 +465,10 @@
                 {{-- FAKE CHART --}}
                 <div class="h-[320px] flex items-end gap-4">
                     <template x-for="(item, index) in (chartMode === 'bulanan' ? chartDataBulanan : chartDataMingguan)" :key="index">
-                        <div class="flex-1 flex flex-col items-center gap-3">
-                            <div :class="item.class" :style="`height: ${item.percentage}%`" :title="`Total: ${item.count}`"></div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full h-[260px] flex items-end justify-center">
+                                <div :class="item.class" :style="`height: ${item.percentage}%; background-color: ${item.color}`" :title="`Total: ${item.count}`"></div>
+                            </div>
                             <span class="text-xs text-slate-500" x-text="item.label"></span>
                         </div>
                     </template>
@@ -489,37 +491,36 @@
 
                 </div>
 
-                {{-- DONUT FAKE --}}
+                {{-- DONUT CHART --}}
                 <div class="flex-1 flex items-center justify-center">
-
-                    <div class="relative w-52 h-52">
-
-                        <div class="absolute inset-0 rounded-full
-                            border-[22px] border-blue-500"></div>
-
-                        <div class="absolute inset-[18px] rounded-full
-                            border-[20px] border-green-500
-                            border-r-transparent"></div>
-
-                        <div class="absolute inset-[38px] rounded-full
-                            bg-white flex items-center justify-center">
-
-                            <div class="text-center">
-
-                                <h3 class="text-3xl font-bold text-slate-800">
-                                    {{ $selesaiPct }}%
-                                </h3>
-
-                                <p class="text-xs text-slate-500">
-                                    Selesai
-                                </p>
-
+                    @if($totalCurrent > 0)
+                        <div class="relative w-52 h-52 rounded-full transition-all duration-500" 
+                             style="background: conic-gradient(#3b82f6 0% {{ $diprosesEnd }}%, #22c55e {{ $diprosesEnd }}% {{ $selesaiEnd }}%, #ef4444 {{ $selesaiEnd }}% 100%)">
+                            <div class="absolute inset-[22px] rounded-full bg-white flex items-center justify-center">
+                                <div class="text-center">
+                                    <h3 class="text-3xl font-bold text-slate-800">
+                                        {{ $selesaiPct }}%
+                                    </h3>
+                                    <p class="text-xs text-slate-500">
+                                        Selesai
+                                    </p>
+                                </div>
                             </div>
-
                         </div>
-
-                    </div>
-
+                    @else
+                        <div class="relative w-52 h-52 rounded-full transition-all duration-500 bg-slate-200">
+                            <div class="absolute inset-[22px] rounded-full bg-white flex items-center justify-center">
+                                <div class="text-center">
+                                    <h3 class="text-3xl font-bold text-slate-400">
+                                        0%
+                                    </h3>
+                                    <p class="text-xs text-slate-400">
+                                        Selesai
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- LEGEND --}}
