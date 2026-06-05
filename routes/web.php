@@ -71,7 +71,7 @@ Route::middleware(['auth', 'admin'])
         Route::patch('/akun-mahasiswa/{id}/toggle-status', [\App\Http\Controllers\Admin\MahasiswaController::class, 'toggleStatus'])
             ->name('akun-mahasiswa.toggle-status');
         
-        Route::view('/laporan', 'admin.laporan.index')
+        Route::get('/laporan', [\App\Http\Controllers\Admin\LaporanController::class, 'index'])
             ->name('laporan.index');
     });
 
