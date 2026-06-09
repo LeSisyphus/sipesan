@@ -19,7 +19,7 @@ Dibangun sebagai Tugas Akhir mata kuliah Pemrograman Web II.
 
 | Komponen        | Teknologi      |
 | --------------- | -------------- |
-| Backend         | Laravel 11     |
+| Backend         | Laravel 13     |
 | Database        | MySQL          |
 | CSS             | Tailwind CSS   |
 | JS              | Alpine.js      |
@@ -35,7 +35,7 @@ Dibangun sebagai Tugas Akhir mata kuliah Pemrograman Web II.
 
 Pastikan sudah terinstall di komputer:
 
-- PHP 8.2+
+- PHP 8.3+
 - Composer
 - Node.js 18+
 - MySQL
@@ -45,7 +45,7 @@ Pastikan sudah terinstall di komputer:
 1. Clone repository
 
     ```bash
-    git clone https://github.com/username/SiPesan.git
+    git clone https://github.com/LeSisyphus/SiPesan.git
     cd SiPesan
     ```
 
