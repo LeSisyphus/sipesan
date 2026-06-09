@@ -7,12 +7,5 @@
     <span class="md:hidden font-h3 text-h3 text-blue-600 font-bold tracking-tight">SIPESAN</span>
   </div>
   <div class="flex items-center gap-md">
-    <!-- Search -->
-    
-    <!-- Notif -->
-    <button class="w-10 h-10 flex items-center justify-center rounded-full glass-panel text-blue-600 hover:bg-white/60 transition-colors">
-      <span class="material-symbols-outlined">notifications</span>
-    </button>
-    
   </div>
 </header>
