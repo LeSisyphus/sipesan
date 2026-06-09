@@ -27,15 +27,17 @@ class MahasiswaController extends Controller
         // Search nama / NIM
         if ($request->filled('search')) {
             $search = $request->search;
+
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%");
+                    ->orWhere('nim', 'like', "%{$search}%");
             });
         }
 
         // Filter status
         if ($request->filled('status') && $request->status !== 'all') {
             $status = $request->status;
+
             $query->whereHas('user', function ($q) use ($status) {
                 $q->where('status', $status);
             });
@@ -43,20 +45,31 @@ class MahasiswaController extends Controller
 
         $mahasiswa = $query->latest()->paginate(10)->withQueryString();
 
-        // Data untuk dropdown filter
         $prodis = Prodi::orderBy('nama_prodi')->get();
+
         $angkatans = Mahasiswa::select('angkatan')
             ->distinct()
             ->orderBy('angkatan', 'desc')
             ->pluck('angkatan');
 
+
         $totalMahasiswa = Mahasiswa::count();
+
+        $totalAktif = Mahasiswa::whereHas('user', function ($query) {
+            $query->where('status', 'aktif');
+        })->count();
+
+        $totalNonaktif = Mahasiswa::whereHas('user', function ($query) {
+            $query->where('status', 'nonaktif');
+        })->count();
 
         return view('admin.akun-mahasiswa.index', compact(
             'mahasiswa',
             'prodis',
             'angkatans',
-            'totalMahasiswa'
+            'totalMahasiswa',
+            'totalAktif',
+            'totalNonaktif'
         ));
     }
 
@@ -64,28 +77,34 @@ class MahasiswaController extends Controller
     {
         $mahasiswa = Mahasiswa::with('user')->findOrFail($id);
         $user = $mahasiswa->user;
-        
+
         // Reset password defaultnya pakai NIM mahasiswa
         $user->update([
-            'password' => Hash::make($user->nim)
+            'password' => Hash::make($user->nim),
         ]);
 
-        return redirect()->route('admin.akun-mahasiswa.index')->with('success', 'Password berhasil di-reset menjadi NIM mahasiswa.');
+        return redirect()
+            ->route('admin.akun-mahasiswa.index')
+            ->with('success', 'Password berhasil di-reset menjadi NIM mahasiswa.');
     }
 
     public function toggleStatus($id)
     {
         $mahasiswa = Mahasiswa::with('user')->findOrFail($id);
         $user = $mahasiswa->user;
-        
+
         $newStatus = $user->status === 'aktif' ? 'nonaktif' : 'aktif';
-        
+
         $user->update([
-            'status' => $newStatus
+            'status' => $newStatus,
         ]);
 
-        $message = $newStatus === 'aktif' ? 'Akun berhasil diaktifkan.' : 'Akun berhasil dinonaktifkan.';
-        return redirect()->route('admin.akun-mahasiswa.index')->with('success', $message);
+        $message = $newStatus === 'aktif'
+            ? 'Akun berhasil diaktifkan.'
+            : 'Akun berhasil dinonaktifkan.';
+
+        return redirect()
+            ->route('admin.akun-mahasiswa.index')
+            ->with('success', $message);
     }
 }
-
