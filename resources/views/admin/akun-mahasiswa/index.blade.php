@@ -97,15 +97,41 @@
                 </div>
                 <div>
                     <p class="text-sm text-slate-400">Total Mahasiswa</p>
-                    <h3 class="text-3xl font-medium text-slate-900">{{ collect($mahasiswa->items())->count() }}</h3>
+                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalMahasiswa }}</h3>
                 </div>
             </div>
         </div>
+
+        <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400">Total Aktif</p>
+                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalAktif }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-red-600">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400">Total Nonaktif</p>
+                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalNonaktif }}</h3>
+                </div>
+            </div>
+        </div>
+
+        
     </div>
 
     {{-- ADVANCED FILTER --}}
     <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] px-6 py-5 mb-8 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
-        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
                 <span class="text-sm font-semibold text-slate-500">Status:</span>
                 <button
@@ -173,15 +199,15 @@
                     @forelse($mahasiswa as $m)
                     <tr class="hover:bg-white/30 transition-colors">
                         <td class="p-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-100 text-blue-600">
-                                    {{ strtoupper($m->user->inisial ?? 'M') }}
-                                </div>
-                                <div>
-                                    <p class="text-[15px] font-semibold text-slate-800">{{ $m->user->name ?? '-' }}</p>
-                                    <p class="text-sm text-slate-400">Mahasiswa</p>
-                                </div>
+                            <div class="flex items-center gap-5">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-100 text-blue-600">
+                                {{ strtoupper($m->user->inisial ?? 'M') }}
                             </div>
+                            <div>
+                                <p class="text-[15px] font-semibold text-slate-800">{{ $m->user->name ?? '-' }}</p>
+                                <p class="text-sm text-slate-400">Mahasiswa</p>
+                            </div>
+                        </div>
                         </td>
                         <td class="p-6 text-[15px] text-slate-700">{{ $m->user->nim ?? '-' }}</td>
                         <td class="p-6 text-[15px] text-slate-500">{{ $m->user->email ?? '-' }}</td>
