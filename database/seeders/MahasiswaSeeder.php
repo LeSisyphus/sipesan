@@ -32,7 +32,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Ahmad Hidayat Pratama',
                 'nim' => '2205101001',
-                'email' => 'ahmad.hidayat@student.sipesan.com',
+                'email' => 'ahmad.hidayat@sipesan.com',
                 'angkatan' => '2022',
                 'no_hp' => '081234567890',
                 'status' => 'aktif',
@@ -40,7 +40,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Budi Santoso Putra',
                 'nim' => '2205101002',
-                'email' => 'budi.santoso@student.sipesan.com',
+                'email' => 'budi.santoso@sipesan.com',
                 'angkatan' => '2022',
                 'no_hp' => '081234567891',
                 'status' => 'aktif',
@@ -48,7 +48,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Citra Lestari Dewi',
                 'nim' => '2205101003',
-                'email' => 'citra.lestari@student.sipesan.com',
+                'email' => 'citra.lestari@sipesan.com',
                 'angkatan' => '2023',
                 'no_hp' => '081234567892',
                 'status' => 'aktif',
@@ -56,7 +56,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Dewi Sartika Putri',
                 'nim' => '2205101004',
-                'email' => 'dewi.sartika@student.sipesan.com',
+                'email' => 'dewi.sartika@sipesan.com',
                 'angkatan' => '2023',
                 'no_hp' => '081234567893',
                 'status' => 'nonaktif',
@@ -64,7 +64,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Eko Prasetyo Utomo',
                 'nim' => '2205101005',
-                'email' => 'eko.prasetyo@student.sipesan.com',
+                'email' => 'eko.prasetyo@sipesan.com',
                 'angkatan' => '2024',
                 'no_hp' => '081234567894',
                 'status' => 'aktif',
@@ -72,7 +72,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Farhan Maulana Yusuf',
                 'nim' => '2205101006',
-                'email' => 'farhan.maulana@student.sipesan.com',
+                'email' => 'farhan.maulana@sipesan.com',
                 'angkatan' => '2024',
                 'no_hp' => '081234567895',
                 'status' => 'aktif',
@@ -80,7 +80,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Gita Permata Sari',
                 'nim' => '2205101007',
-                'email' => 'gita.permata@student.sipesan.com',
+                'email' => 'gita.permata@sipesan.com',
                 'angkatan' => '2022',
                 'no_hp' => '081234567896',
                 'status' => 'aktif',
@@ -88,7 +88,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Hendra Wijaya Kusuma',
                 'nim' => '2205101008',
-                'email' => 'hendra.wijaya@student.sipesan.com',
+                'email' => 'hendra.wijaya@sipesan.com',
                 'angkatan' => '2023',
                 'no_hp' => '081234567897',
                 'status' => 'nonaktif',
@@ -96,7 +96,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Indah Cahyani Putri',
                 'nim' => '2205101009',
-                'email' => 'indah.cahyani@student.sipesan.com',
+                'email' => 'indah.cahyani@sipesan.com',
                 'angkatan' => '2024',
                 'no_hp' => '081234567898',
                 'status' => 'aktif',
@@ -104,7 +104,7 @@ class MahasiswaSeeder extends Seeder
             [
                 'name' => 'Joko Susilo Wibowo',
                 'nim' => '2205101010',
-                'email' => 'joko.susilo@student.sipesan.com',
+                'email' => 'joko.susilo@sipesan.com',
                 'angkatan' => '2022',
                 'no_hp' => '081234567899',
                 'status' => 'aktif',
