@@ -29,35 +29,17 @@
         </a>
     </div>
 
-    {{-- SUMMARY --}}
+    {{-- SUMMARY (Refactored to be DRY using AlpineJS x-for) --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="glass-panel rounded-[22px] p-5">
-            <p class="text-sm text-slate-500">Total</p>
-            <p class="text-3xl font-semibold text-slate-900 mt-1">{{ $totalPengajuan }}</p>
-        </div>
-
-        <div class="glass-panel rounded-[22px] p-5">
-            <p class="text-sm text-slate-500">Menunggu</p>
-            <p class="text-3xl font-semibold text-slate-600 mt-1">{{ $menunggu }}</p>
-        </div>
-
-        <div class="glass-panel rounded-[22px] p-5">
-            <p class="text-sm text-slate-500">Diproses</p>
-            <p class="text-3xl font-semibold text-violet-600 mt-1">{{ $diproses }}</p>
-        </div>
-
-        <div class="glass-panel rounded-[22px] p-5">
-            <p class="text-sm text-slate-500">Selesai</p>
-            <p class="text-3xl font-semibold text-primary mt-1">{{ $selesai }}</p>
-        </div>
-
-        <div class="glass-panel rounded-[22px] p-5">
-            <p class="text-sm text-slate-500">Ditolak</p>
-            <p class="text-3xl font-semibold text-red-500 mt-1">{{ $ditolak }}</p>
-        </div>
+        <template x-for="stat in stats" :key="stat.label">
+            <div class="glass-panel rounded-[22px] p-5">
+                <p class="text-sm text-slate-500" x-text="stat.label"></p>
+                <p class="text-3xl font-semibold mt-1" :class="stat.color" x-text="stat.value"></p>
+            </div>
+        </template>
     </div>
 
-    {{-- SEARCH + FILTER --}}
+    {{-- SEARCH + FILTER (Refactored to be DRY using AlpineJS x-for) --}}
     <div class="glass-panel rounded-[28px] p-4 flex flex-col lg:flex-row gap-3">
         <div class="flex-1 flex items-center gap-3 bg-white rounded-2xl border border-slate-200 px-5 py-3">
             <span class="material-symbols-rounded text-slate-400">
@@ -73,45 +55,14 @@
         </div>
 
         <div class="flex gap-2 flex-wrap">
-            <button
-                @click="filter='all'"
-                :class="filter === 'all' ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
-            >
-                Semua
-            </button>
-
-            <button
-                @click="filter='menunggu'"
-                :class="filter === 'menunggu' ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
-            >
-                Menunggu
-            </button>
-
-            <button
-                @click="filter='diproses'"
-                :class="filter === 'diproses' ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
-            >
-                Diproses
-            </button>
-
-            <button
-                @click="filter='selesai'"
-                :class="filter === 'selesai' ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
-            >
-                Selesai
-            </button>
-
-            <button
-                @click="filter='ditolak'"
-                :class="filter === 'ditolak' ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
-            >
-                Ditolak
-            </button>
+            <template x-for="btn in filters" :key="btn.val">
+                <button
+                    @click="filter = btn.val"
+                    :class="filter === btn.val ? 'bg-primary text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-5 py-2.5 rounded-full font-semibold transition-all duration-300"
+                    x-text="btn.label"
+                ></button>
+            </template>
         </div>
     </div>
 
@@ -397,6 +348,24 @@
             modal: false,
             selected: {},
             items: @json($riwayatItems),
+
+            // Data untuk kotak summary (DRY)
+            stats: [
+                { label: 'Total', value: '{{ $totalPengajuan }}', color: 'text-slate-900' },
+                { label: 'Menunggu', value: '{{ $menunggu }}', color: 'text-slate-600' },
+                { label: 'Diproses', value: '{{ $diproses }}', color: 'text-violet-600' },
+                { label: 'Selesai', value: '{{ $selesai }}', color: 'text-primary' },
+                { label: 'Ditolak', value: '{{ $ditolak }}', color: 'text-red-500' }
+            ],
+
+            // Data untuk filter buttons (DRY)
+            filters: [
+                { val: 'all', label: 'Semua' },
+                { val: 'menunggu', label: 'Menunggu' },
+                { val: 'diproses', label: 'Diproses' },
+                { val: 'selesai', label: 'Selesai' },
+                { val: 'ditolak', label: 'Ditolak' }
+            ],
 
             openDetail(item) {
                 this.selected = item

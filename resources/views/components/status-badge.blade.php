@@ -1,34 +1,14 @@
 @props(['status'])
 
 @php
-    $classes = match($status) {
-
-        'menunggu' =>
-            'bg-slate-100 text-slate-600',
-
-        'diproses' =>
-            'bg-purple-100 text-purple-600',
-
-        'selesai' =>
-            'bg-blue-100 text-blue-600',
-
-        'ditolak' =>
-            'bg-red-100 text-red-600',
-
-        default =>
-            'bg-slate-100 text-slate-600',
+    $config = match(strtolower($status)) {
+        'diproses' => ['label' => 'Diproses', 'badge' => 'bg-violet-100 text-violet-700', 'icon' => 'pending_actions'],
+        'selesai' => ['label' => 'Selesai', 'badge' => 'bg-blue-100 text-primary', 'icon' => 'mark_email_read'],
+        'ditolak' => ['label' => 'Ditolak', 'badge' => 'bg-red-100 text-red-600', 'icon' => 'cancel'],
+        default => ['label' => 'Menunggu', 'badge' => 'bg-slate-100 text-slate-700', 'icon' => 'hourglass_empty'],
     };
 @endphp
 
-<span
-    {{ $attributes->merge([
-        'class' =>
-            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold {$classes}"
-    ]) }}
->
-
-    <span class="w-2 h-2 rounded-full bg-current"></span>
-
-    {{ ucfirst($status) }}
-
+<span {{ $attributes->merge(['class' => "px-4 py-1 rounded-full text-sm font-semibold {$config['badge']}"]) }}>
+    {{ $config['label'] }}
 </span>
