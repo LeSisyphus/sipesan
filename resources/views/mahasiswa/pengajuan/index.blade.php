@@ -164,59 +164,15 @@
                         </div>
                     @endif
 
-                    <div>
-                        <label class="block mb-2 text-sm font-semibold text-slate-500">
-                            Nama Lengkap
-                        </label>
-
-                        <input
-                            type="text"
-                            class="glass-input w-full px-5 py-3 bg-white/50"
-                            value="{{ $user->name }}"
-                            readonly
-                        >
-                    </div>
+                    {{-- Implementasi komponen x-form-input biar DRY --}}
+                    <x-form-input id="nama" label="Nama Lengkap" value="{{ $user->name }}" readonly="true" />
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-slate-500">
-                                NIM
-                            </label>
-
-                            <input
-                                type="text"
-                                class="glass-input w-full px-5 py-3 bg-white/50"
-                                value="{{ $user->nim ?? '-' }}"
-                                readonly
-                            >
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-slate-500">
-                                Angkatan
-                            </label>
-
-                            <input
-                                type="text"
-                                class="glass-input w-full px-5 py-3 bg-white/50"
-                                value="{{ $mahasiswa?->angkatan ?? '-' }}"
-                                readonly
-                            >
-                        </div>
+                        <x-form-input id="nim" label="NIM" value="{{ $user->nim ?? '-' }}" readonly="true" />
+                        <x-form-input id="angkatan" label="Angkatan" value="{{ $mahasiswa?->angkatan ?? '-' }}" readonly="true" />
                     </div>
 
-                    <div>
-                        <label class="block mb-2 text-sm font-semibold text-slate-500">
-                            Program Studi
-                        </label>
-
-                        <input
-                            type="text"
-                            class="glass-input w-full px-5 py-3 bg-white/50"
-                            value="{{ $mahasiswa?->prodi?->nama_prodi ?? '-' }}"
-                            readonly
-                        >
-                    </div>
+                    <x-form-input id="prodi" label="Program Studi" value="{{ $mahasiswa?->prodi?->nama_prodi ?? '-' }}" readonly="true" />
 
                     <div>
                         <label for="alamat_lengkap" class="block mb-2 text-sm font-semibold text-slate-500">
