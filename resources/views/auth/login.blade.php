@@ -1,3 +1,5 @@
+@section('title', 'Login')
+
 <x-guest-layout>
     <x-slot name="title">Login</x-slot>
     <div x-data="{ showPassword: false, loading: false }">
