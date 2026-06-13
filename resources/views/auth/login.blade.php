@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <x-slot name="title">Login</x-slot>
     <div x-data="{ showPassword: false, loading: false }">
         <div class="mb-8">
             <h2 class="text-[34px] font-semibold tracking-tight text-[#111827]">
