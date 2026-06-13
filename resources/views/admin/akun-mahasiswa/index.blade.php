@@ -4,6 +4,9 @@
 
 @section('content')
 
+{{-- Panggil Komponen Alerts --}}
+<x-admin-alerts />
+
 <main
     class="md:ml-64 pt-24 px-6 pb-12 relative z-10"
     x-data="{
@@ -13,6 +16,20 @@
         angkatanId: '{{ request('angkatan', '') }}',
         openDetail: false,
         detailData: {},
+
+        // Data untuk kotak summary
+        stats: [
+            { label: 'Total Mahasiswa', value: '{{ $totalMahasiswa }}', icon: 'groups', bg: 'bg-blue-100', text: 'text-blue-600' },
+            { label: 'Total Aktif', value: '{{ $totalAktif }}', icon: 'groups', bg: 'bg-green-100', text: 'text-green-600' },
+            { label: 'Total Nonaktif', value: '{{ $totalNonaktif }}', icon: 'groups', bg: 'bg-red-100', text: 'text-red-600' }
+        ],
+
+        // Data untuk filter buttons
+        filters: [
+            { label: 'Semua', value: 'all' },
+            { label: 'Aktif', value: 'aktif' },
+            { label: 'Nonaktif', value: 'nonaktif' }
+        ],
 
         openDetailModal(data) {
             this.detailData = data;
@@ -61,6 +78,7 @@
         applyFilter() {
             let url = new URL(window.location.href);
             url.searchParams.set('status', this.activeFilter);
+            
             if(this.searchQuery) url.searchParams.set('search', this.searchQuery);
             else url.searchParams.delete('search');
             
@@ -76,57 +94,28 @@
 >
 
     {{-- HEADER --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-[32px] font-bold tracking-tight text-slate-900">
-                Akun Mahasiswa
-            </h1>
-            <p class="text-slate-500 mt-1">
-                Kelola akun mahasiswa SIPESAN.
-            </p>
-        </div>
-    </div>
+    <x-admin-header 
+        title="Akun Mahasiswa" 
+        description="Kelola akun mahasiswa SIPESAN." 
+        buttonText="" 
+        buttonAction="" 
+    />
 
     {{-- STATS CARDS --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-        {{-- TOTAL --}}
-        <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
-                    <span class="material-symbols-outlined">groups</span>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-400">Total Mahasiswa</p>
-                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalMahasiswa }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
-                    <span class="material-symbols-outlined">groups</span>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-400">Total Aktif</p>
-                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalAktif }}</h3>
+        <template x-for="stat in stats" :key="stat.label">
+            <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" :class="stat.bg + ' ' + stat.text">
+                        <span class="material-symbols-outlined" x-text="stat.icon"></span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-400" x-text="stat.label"></p>
+                        <h3 class="text-3xl font-medium text-slate-900" x-text="stat.value"></h3>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="bg-white/55 backdrop-blur-xl border border-white/40 rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,112,235,0.08)]">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-red-600">
-                    <span class="material-symbols-outlined">groups</span>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-400">Total Nonaktif</p>
-                    <h3 class="text-3xl font-medium text-slate-900">{{ $totalNonaktif }}</h3>
-                </div>
-            </div>
-        </div>
-
-        
+        </template>
     </div>
 
     {{-- ADVANCED FILTER --}}
@@ -134,21 +123,14 @@
         <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
                 <span class="text-sm font-semibold text-slate-500">Status:</span>
-                <button
-                    @click="activeFilter = 'all'; applyFilter()"
-                    :class="activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-white/60 text-slate-600'"
-                    class="px-5 py-2 rounded-full text-sm font-semibold transition-all"
-                >Semua</button>
-                <button
-                    @click="activeFilter = 'aktif'; applyFilter()"
-                    :class="activeFilter === 'aktif' ? 'bg-blue-600 text-white' : 'bg-white/60 text-slate-600'"
-                    class="px-5 py-2 rounded-full text-sm font-semibold transition-all"
-                >Aktif</button>
-                <button
-                    @click="activeFilter = 'nonaktif'; applyFilter()"
-                    :class="activeFilter === 'nonaktif' ? 'bg-blue-600 text-white' : 'bg-white/60 text-slate-600'"
-                    class="px-5 py-2 rounded-full text-sm font-semibold transition-all"
-                >Nonaktif</button>
+                <template x-for="f in filters" :key="f.value">
+                    <button
+                        @click="activeFilter = f.value; applyFilter()"
+                        :class="activeFilter === f.value ? 'bg-blue-600 text-white' : 'bg-white/60 text-slate-600'"
+                        class="px-5 py-2 rounded-full text-sm font-semibold transition-all"
+                        x-text="f.label"
+                    ></button>
+                </template>
             </div>
 
             <div class="flex flex-wrap items-center gap-4">
@@ -186,13 +168,13 @@
             <table class="w-full border-collapse">
                 <thead>
                     <tr class="border-b border-white/40 bg-white/20">
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">Mahasiswa</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">NIM</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">Email</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">Prodi</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">Angkatan</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400">Status</th>
-                        <th class="p-6 text-xs uppercase tracking-wider font-semibold text-slate-400 text-center">Aksi</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">Mahasiswa</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">NIM</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">Email</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">Prodi</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">Angkatan</th>
+                        <th class="p-6 text-left text-xs uppercase tracking-wider font-semibold text-slate-400">Status</th>
+                        <th class="p-6 text-center text-xs uppercase tracking-wider font-semibold text-slate-400">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/40">
@@ -200,14 +182,14 @@
                     <tr class="hover:bg-white/30 transition-colors">
                         <td class="p-6">
                             <div class="flex items-center gap-5">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-100 text-blue-600">
-                                {{ strtoupper($m->user->inisial ?? 'M') }}
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-blue-100 text-blue-600">
+                                    {{ strtoupper($m->user->inisial ?? 'M') }}
+                                </div>
+                                <div>
+                                    <p class="text-[15px] font-semibold text-slate-800">{{ $m->user->name ?? '-' }}</p>
+                                    <p class="text-sm text-slate-400">Mahasiswa</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-[15px] font-semibold text-slate-800">{{ $m->user->name ?? '-' }}</p>
-                                <p class="text-sm text-slate-400">Mahasiswa</p>
-                            </div>
-                        </div>
                         </td>
                         <td class="p-6 text-[15px] text-slate-700">{{ $m->user->nim ?? '-' }}</td>
                         <td class="p-6 text-[15px] text-slate-500">{{ $m->user->email ?? '-' }}</td>
