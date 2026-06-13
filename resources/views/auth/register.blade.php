@@ -1,3 +1,5 @@
+@section('title', 'Register')
+
 <x-guest-layout>
     <x-slot name="title">Register</x-slot>
 
