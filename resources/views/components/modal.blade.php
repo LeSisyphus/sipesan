@@ -21,10 +21,8 @@ $maxWidth = [
     x-data="{
         show: @js($show),
         focusables() {
-            // All focusable element types...
             let selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])'
             return [...$el.querySelectorAll(selector)]
-                // All non-disabled elements...
                 .filter(el => ! el.hasAttribute('disabled'))
         },
         firstFocusable() { return this.focusables()[0] },
@@ -36,10 +34,10 @@ $maxWidth = [
     }"
     x-init="$watch('show', value => {
         if (value) {
-            document.body.classList.add('overflow-y-hidden');
+            document.body.style.overflow = 'hidden';
             {{ $attributes->has('focusable') ? 'setTimeout(() => firstFocusable().focus(), 100)' : '' }}
         } else {
-            document.body.classList.remove('overflow-y-hidden');
+            document.body.style.overflow = '';
         }
     })"
     x-on:open-modal.window="$event.detail == '{{ $name }}' ? show = true : null"
@@ -49,33 +47,38 @@ $maxWidth = [
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
-    class="fixed inset-0 overflow-y-auto px-4 py-10 sm:px-0 z-50"
+    class="relative z-50"
     style="display: none;"
 >
+    {{-- Backdrop Layer --}}
     <div
         x-show="show"
-        class="fixed inset-0 transform transition-all"
-        x-on:click="show = false"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-    >
-        <div class="absolute inset-0 bg-slate-900/35 backdrop-blur-sm"></div>
-    </div>
+        class="fixed inset-0 bg-slate-900/35 backdrop-blur-sm"
+    ></div>
 
-    <div
-        x-show="show"
-        class="mb-6 bg-white/95 backdrop-blur-2xl rounded-[32px] overflow-hidden border border-white/40 shadow-2xl shadow-blue-500/10 transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
-        x-transition:enter="ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-        x-transition:leave="ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-    >
-        {{ $slot }}
+    {{-- Modal Placement Layer --}}
+    <div class="fixed inset-0 flex items-center justify-center p-4 sm:p-0 pointer-events-none">
+        <div
+            x-show="show"
+            @click.outside="show = false"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="pointer-events-auto w-full {{ $maxWidth }} bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-white/40 flex flex-col sm:mx-auto"
+            style="max-height: 85vh;"
+        >
+            <div class="flex-grow overflow-y-auto">
+                {{ $slot }}
+            </div>
+        </div>
     </div>
 </div>
