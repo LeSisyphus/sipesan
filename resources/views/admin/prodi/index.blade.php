@@ -14,7 +14,7 @@
         activeFilter: 'Semua',
         search: '',
         
-        isEdit: false,
+        editMode: false,
         actionUrl: '',
         formData: {
             kode_prodi: '',
@@ -40,7 +40,7 @@
         filters: ['Semua', 'S1', 'D3', 'D4', 'S2'],
 
         editProdi(prodi) {
-            this.isEdit = true;
+            this.editMode = true;
             this.actionUrl = '{{ url('/admin/prodi') }}/' + prodi.id;
             this.formData = {
                 kode_prodi: prodi.kode_prodi,
@@ -57,7 +57,7 @@
         },
 
         addProdi() {
-            this.isEdit = false;
+            this.editMode = false;
             this.actionUrl = '{{ route('admin.prodi.store') }}';
             this.formData = {
                 kode_prodi: '',

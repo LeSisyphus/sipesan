@@ -43,11 +43,11 @@
                                 <span class="text-xl font-black tracking-tight text-white">SIPESAN</span>
                             </div>
 
-                            <h1 class="mb-4 max-w-sm text-3xl font-bold leading-tight text-white">
-                                Sistem Pengajuan Surat Akademik
+                            <h1 class="mb-4 max-w-sm text-2xl font-bold leading-tight text-white">
+                                Sistem Pengajuan Surat Akademik dan Non Akademik
                             </h1>
                             <p class="max-w-md text-base leading-relaxed text-[#d8e2ff]">
-                                Kelola pengajuan dokumen akademik dengan cepat, transparan, dan mudah dilacak.
+                                Kelola pengajuan dokumen akademik dan non akademik dengan cepat, transparan, dan mudah dilacak.
                             </p>
                         </div>
                     @endisset
