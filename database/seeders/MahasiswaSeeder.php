@@ -2,136 +2,82 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use App\Models\Mahasiswa;
 use App\Models\Prodi;
-use Illuminate\Support\Facades\Schema;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class MahasiswaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Truncate tabel mahasiswa dan hapus user dengan role mahasiswa agar tidak duplikat saat dijalankan berkali-kali
-        Schema::disableForeignKeyConstraints();
-        Mahasiswa::truncate();
-        User::where('role', 'mahasiswa')->delete();
-        Schema::enableForeignKeyConstraints();
+        $prodi = Prodi::where('kode_prodi', 'TIF')->first()
+            ?? Prodi::where('nama_prodi', 'Teknologi Informasi')->first()
+            ?? Prodi::first();
 
-        // Ambil ID Prodi yang tersedia
-        $prodiIds = Prodi::pluck('id')->toArray();
-
-        // Jika prodi belum di-seed, jalankan ProdiSeeder terlebih dahulu
-        if (empty($prodiIds)) {
+        if (! $prodi) {
             $this->call(ProdiSeeder::class);
-            $prodiIds = Prodi::pluck('id')->toArray();
+            $prodi = Prodi::where('kode_prodi', 'TIF')->first()
+                ?? Prodi::where('nama_prodi', 'Teknologi Informasi')->first()
+                ?? Prodi::first();
         }
 
-        $dummyStudents = [
-            [
-                'name' => 'Ahmad Hidayat Pratama',
-                'nim' => '2205101001',
-                'email' => 'ahmad.hidayat@sipesan.com',
-                'angkatan' => '2022',
-                'no_hp' => '081234567890',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Budi Santoso Putra',
-                'nim' => '2205101002',
-                'email' => 'budi.santoso@sipesan.com',
-                'angkatan' => '2022',
-                'no_hp' => '081234567891',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Citra Lestari Dewi',
-                'nim' => '2205101003',
-                'email' => 'citra.lestari@sipesan.com',
-                'angkatan' => '2023',
-                'no_hp' => '081234567892',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Dewi Sartika Putri',
-                'nim' => '2205101004',
-                'email' => 'dewi.sartika@sipesan.com',
-                'angkatan' => '2023',
-                'no_hp' => '081234567893',
-                'status' => 'nonaktif',
-            ],
-            [
-                'name' => 'Eko Prasetyo Utomo',
-                'nim' => '2205101005',
-                'email' => 'eko.prasetyo@sipesan.com',
-                'angkatan' => '2024',
-                'no_hp' => '081234567894',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Farhan Maulana Yusuf',
-                'nim' => '2205101006',
-                'email' => 'farhan.maulana@sipesan.com',
-                'angkatan' => '2024',
-                'no_hp' => '081234567895',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Gita Permata Sari',
-                'nim' => '2205101007',
-                'email' => 'gita.permata@sipesan.com',
-                'angkatan' => '2022',
-                'no_hp' => '081234567896',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Hendra Wijaya Kusuma',
-                'nim' => '2205101008',
-                'email' => 'hendra.wijaya@sipesan.com',
-                'angkatan' => '2023',
-                'no_hp' => '081234567897',
-                'status' => 'nonaktif',
-            ],
-            [
-                'name' => 'Indah Cahyani Putri',
-                'nim' => '2205101009',
-                'email' => 'indah.cahyani@sipesan.com',
-                'angkatan' => '2024',
-                'no_hp' => '081234567898',
-                'status' => 'aktif',
-            ],
-            [
-                'name' => 'Joko Susilo Wibowo',
-                'nim' => '2205101010',
-                'email' => 'joko.susilo@sipesan.com',
-                'angkatan' => '2022',
-                'no_hp' => '081234567899',
-                'status' => 'aktif',
-            ],
-        ];
+        $mahasiswaUsers = User::where('role', 'mahasiswa')
+            ->orderBy('nim')
+            ->get();
 
-        foreach ($dummyStudents as $index => $data) {
-            // Tentukan prodi_id secara bergantian dari prodi yang tersedia
-            $prodiId = $prodiIds[$index % count($prodiIds)];
-
-            // Create User
-            $user = User::create([
-                'name' => $data['name'],
-                'nim' => $data['nim'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['nim']),
-                'role' => 'mahasiswa',
-                'status' => $data['status'],
-            ]);
-
-            // Create Mahasiswa linked to User
-            Mahasiswa::create([
-                'user_id' => $user->id,
-                'prodi_id' => $prodiId,
-                'angkatan' => $data['angkatan'],
-                'no_hp' => $data['no_hp'],
-            ]);
+        foreach ($mahasiswaUsers as $index => $user) {
+            Mahasiswa::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'prodi_id' => $prodi->id,
+                    'angkatan' => '2023',
+                    'no_hp' => $this->phoneNumber($index),
+                    'tempat_lahir' => $this->birthPlace($index),
+                    'tanggal_lahir' => $this->birthDate($index),
+                    'jenis_kelamin' => $this->gender($index),
+                    'alamat' => $this->address($index),
+                    'email_alternatif' => $this->alternativeEmail($user->email),
+                    'kontak_darurat' => $this->phoneNumber($index + 20),
+                ]
+            );
         }
+    }
+
+    private function phoneNumber(int $index): string
+    {
+        return '088242667' . str_pad((string) ($index + 100), 3, '0', STR_PAD_LEFT);
+    }
+
+    private function birthPlace(int $index): string
+    {
+        $places = ['Samarinda', 'Banjarmasin', 'Balikpapan', 'Banjarbaru', 'Martapura'];
+        return $places[$index % count($places)];
+    }
+
+    private function birthDate(int $index): string
+    {
+        $day = str_pad((string) (($index % 27) + 1), 2, '0', STR_PAD_LEFT);
+        $month = str_pad((string) (($index % 12) + 1), 2, '0', STR_PAD_LEFT);
+
+        return "2004-{$month}-{$day}";
+    }
+
+    private function gender(int $index): string
+    {
+        return $index % 2 === 0 ? 'Laki-laki' : 'Perempuan';
+    }
+
+    private function address(int $index): string
+    {
+        $cities = ['Samarinda', 'Banjarmasin', 'Balikpapan', 'Banjarbaru', 'Martapura'];
+        return 'Jl. Demo SiPesan No. ' . ($index + 1) . ', ' . $cities[$index % count($cities)];
+    }
+
+    private function alternativeEmail(string $email): string
+    {
+        [$name] = explode('@', $email);
+
+        return $name . '.backup@example.com';
     }
 }
