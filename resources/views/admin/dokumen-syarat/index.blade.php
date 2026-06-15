@@ -347,8 +347,8 @@
                                             </div>
                                         </div>
                                         <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                                            <form method="POST" action="{{ route('admin.dokumen-syarat.putuskan') }}" @submit="confirmDelete($event, 'Lepas Syarat dari Surat?')">
-                                                @csrf @method('DELETE')
+                                           <form method="POST" action="{{ route('admin.dokumen-syarat.putuskan') }}" @submit="confirmDelete($event, 'Lepas Syarat dari Surat?')">
+                                             @csrf
                                                 <input type="hidden" name="jenis_surat_id" value="{{ $surat->id }}">
                                                 <input type="hidden" name="dokumen_syarat_id" value="{{ $dokumen->id }}">
                                                 <button type="submit" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50" title="Lepas dari jenis surat">
