@@ -43,7 +43,7 @@ class MahasiswaController extends Controller
             });
         }
 
-        $mahasiswa = $query->latest()->paginate(10)->withQueryString();
+        $mahasiswa = $query->latest()->paginate(5)->withQueryString();
 
         $prodis = Prodi::orderBy('nama_prodi')->get();
 
