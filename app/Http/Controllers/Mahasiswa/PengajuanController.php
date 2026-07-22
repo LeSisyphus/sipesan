@@ -172,11 +172,15 @@ class PengajuanController extends Controller
     }
 
     private function authorizeOwner(Pengajuan $pengajuan): void
-    {
-        $mahasiswa = request()->user()->mahasiswa;
+{
+    $mahasiswa = request()->user()?->mahasiswa;
 
-        abort_if(! $mahasiswa || $pengajuan->mahasiswa_id !== $mahasiswa->id, 403);
-    }
+    abort_unless(
+        $mahasiswa !== null
+        && (string) $pengajuan->mahasiswa_id === (string) $mahasiswa->getKey(),
+        403
+    );
+}
 
     private function normalizeAllowedFormats(?string $allowedFormats): array
     {
